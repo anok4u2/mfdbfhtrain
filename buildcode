@@ -1,0 +1,10 @@
+#! /bin/sh
+cob -zgU ENQ1.cbl
+cob -zgU ENQ2.cbl
+cob -zgU MSG1.cbl
+cob -zgU MFWAIT.cbl
+cp *.so ./CICSDB1loadlib
+cp *.so ./CICSDB2loadlib
+rm *.o *.so *.int *.idy
+
+  

@@ -1,0 +1,6 @@
+#! /bin/sh
+dbfhdeploy data list sql://myserver/VSAMDATA?folder=/CATALOG/FILES
+
+
+
+

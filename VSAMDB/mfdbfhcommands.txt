@@ -1,0 +1,6 @@
+-add -file:MFDBFH.cfg -server:MYSERVER -provider:pg -comment:"POSTGRES server" 
+-add -file:MFDBFH.cfg -server:MYSERVER -dsn:PG.POSTGRES -type:database -name:postgres -user:postgres -password:mypassword
+-add -file:MFDBFH.cfg -server:MYSERVER -dsn:PG.VSAMDATA -type:datastore -name:VSAMDATA -user:postgres -password:mypassword
+-add -file:MFDBFH.cfg -server:MYSERVER -dsn:PG.MYPAC -type:region -name:MYPAC -user:postgres -password:mypassword
+-add -file:MFDBFH.cfg -server:MYSERVER -dsn:PG.CROSSREGION -type:crossregion -user:postgres -password:mypassword
+

@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<mfDirectoryServerRepository mfDirectoryServerVersion="1.26.58" mfRepositoryLocation="/home/ec2-user/mfdbfhtrain" mfXMLReposVersion="2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="mfds1.26.58.xsd">
+
+  <mfServerList>
+    <mfServer>
+      <objectclass>mfServer</objectclass>
+      <mfStructVersion>26</mfStructVersion>
+      <mfUID>1.2.840.5043.01.026.1614414228.3</mfUID>
+      <mfServerStatus>Stopped</mfServerStatus>
+      <mfServerType>MFES</mfServerType>
+      <cn>CICSDB1</cn>
+      <description>Micro Focus Enterprise Server</description>
+      <mfESEnableStartScript>Disabled</mfESEnableStartScript>
+      <mfESEnableStopScript>Disabled</mfESEnableStopScript>
+      <mfESEnableNotRespondingScript>Disabled</mfESEnableNotRespondingScript>
+      <mfESRetries>1</mfESRetries>
+      <mfCustomConfiguration>[ES-Environment]
+MFROOT=/home/ec2-user/mfdbfhtrain
+ES_ADMIN_SEPS=5
+#COBCONFIG=$MFROOT/cob.cfg
+#MFTRACE_CONFIG=$MFROOT/ctf.cfg
+################################################################################
+#### MFDBFH Configuration
+#MFDBFH_CONFIG=$MFROOT/VSAMDB/MFDBFH.cfg
+#MFDBFH_SCRIPT_DIR=$COBDIR/etc/mfdbfh/scripts
+#
+#### Next Variable needed to enable MFDBFH
+#ES_DB_FH=Y
+#
+#### Next Variable needed for PAC
+#ES_DB_SERVER=MYSERVER
+
+</mfCustomConfiguration>
+      <mfServerExtendedConfiguration>
+        <mfServerCASConfiguration>
+          <mfCASStructVersion>33</mfCASStructVersion>
+          <mfServerCASStartupOptions>
+            <mfCASPAC/>
+            <mfCASSOR/>
+            <mfCASShMemPages>4096</mfCASShMemPages>
+            <mfCASSICount>10</mfCASSICount>
+            <mfCASShMemCushion>32</mfCASShMemCushion>
+            <mfCASTraceTableSize>341</mfCASTraceTableSize>
+            <mfCASLocalTraceSize>341</mfCASLocalTraceSize>
+            <mfCASTraceMaxSize>0</mfCASTraceMaxSize>
+            <mfCASRequestedLicenses>999</mfCASRequestedLicenses>
+            <mfCASSysDir/>
+            <mfCASHSFEnabled>0</mfCASHSFEnabled>
+            <mfCASHSFWriteToDisk>0</mfCASHSFWriteToDisk>
+            <mfCASHSFMaxFileSize>0</mfCASHSFMaxFileSize>
+            <mfCASHSFMaxDisplayRecords>256</mfCASHSFMaxDisplayRecords>
+            <mfCASHSFCreateJCLFileRecords>0</mfCASHSFCreateJCLFileRecords>
+            <mfCASConsoleLogSize>0</mfCASConsoleLogSize>
+            <mfCASDefaultSysDir/>
+            <mfLogPath/>
+            <mfCASDumpOnAbend>1</mfCASDumpOnAbend>
+            <mfCASColdStartTrace>1</mfCASColdStartTrace>
+            <mfCASAuxiliaryTrace>0</mfCASAuxiliaryTrace>
+            <mfCASShowConsole>0</mfCASShowConsole>
+            <mfCASRemoteDebug>0</mfCASRemoteDebug>
+            <mfCASIRDSWarmStart>0</mfCASIRDSWarmStart>
+            <mfCASIRDSFileName/>
+            <mfCASIRDSMaxSize>0</mfCASIRDSMaxSize>
+            <mfCASIRDSBufferQueueCount>0</mfCASIRDSBufferQueueCount>
+            <mfCASStartOnSystemStart>0</mfCASStartOnSystemStart>
+            <mfCASCICSEZASOKET>0</mfCASCICSEZASOKET>
+            <mfCAS64Bit>1</mfCAS64Bit>
+            <mfCASPurgeLogs>0</mfCASPurgeLogs>
+            <mfCASPerformanceMonitor>0</mfCASPerformanceMonitor>
+            <mfCASEventLogInformational>0</mfCASEventLogInformational>
+            <mfCASEventLogWarning>0</mfCASEventLogWarning>
+            <mfCASEventLogError>0</mfCASEventLogError>
+            <mfCASEventLogSevere>0</mfCASEventLogSevere>
+            <mfCASMTOEnabled>1</mfCASMTOEnabled>
+            <mfCASCICSPersonality>1</mfCASCICSPersonality>
+            <mfCASBatchEnabled>1</mfCASBatchEnabled>
+            <mfCASIMSEnabled>0</mfCASIMSEnabled>
+            <mfCASPLIEnabled>0</mfCASPLIEnabled>
+            <mfMQLEnabled>0</mfMQLEnabled>
+          </mfServerCASStartupOptions>
+          <mfServerCASTraceOptions>
+            <mfCASTraceFlagsTaskControl>1</mfCASTraceFlagsTaskControl>
+            <mfCASTraceFlagsStorageControl>0</mfCASTraceFlagsStorageControl>
+            <mfCASTraceFlagsTableManagement>0</mfCASTraceFlagsTableManagement>
+            <mfCASTraceFlagsApplicationContainer>0</mfCASTraceFlagsApplicationContainer>
+            <mfCASTraceFlagsRequestHandler>0</mfCASTraceFlagsRequestHandler>
+            <mfCASTraceFlagsRMInterface>0</mfCASTraceFlagsRMInterface>
+            <mfCASTraceFlagsCommunications>0</mfCASTraceFlagsCommunications>
+            <mfCASTraceFlagsApplication>1</mfCASTraceFlagsApplication>
+            <mfCASTraceFlagsExit>0</mfCASTraceFlagsExit>
+          </mfServerCASTraceOptions>
+          <mfServerMTOConfiguration>
+            <mfCASCICSSIT>CICSSIT</mfCASCICSSIT>
+            <mfCASTXTRANP>$MFROOT/CICSDB1loadlib</mfCASTXTRANP>
+            <mfCASTXFILEP>$MFROOT/data</mfCASTXFILEP>
+            <mfCASTXRDTP>$MFROOT/cics</mfCASTXRDTP>
+          </mfServerMTOConfiguration>
+          <mfServerBatchConfiguration>
+            <mfCASJCLMainframePollInterval>0</mfCASJCLMainframePollInterval>
+            <mfCASJCLPATH>$MFROOT/CICSDB1loadlib</mfCASJCLPATH>
+            <mfCASMFSYSCAT>$MFROOT/data/catalog.dat</mfCASMFSYSCAT>
+            <mfCASJCLALLOCLOC>$MFROOT/data</mfCASJCLALLOCLOC>
+            <mfCASJCLSYSPROCLIB>SYS1.PROCLIB</mfCASJCLSYSPROCLIB>
+          </mfServerBatchConfiguration>
+          <mfServerIMSConfiguration>
+            <mfCASIMSCodesetBias>A</mfCASIMSCodesetBias>
+            <mfCASIMSMFSAttributeBias>B</mfCASIMSMFSAttributeBias>
+            <mfCASIMSMFSNullChar>x'1A'</mfCASIMSMFSNullChar>
+            <mfCASIMSKeypointFrequency>64</mfCASIMSKeypointFrequency>
+            <mfCASIMSDefaultMQName>1</mfCASIMSDefaultMQName>
+            <mfCASIMSTrailingSpace>1</mfCASIMSTrailingSpace>
+            <mfCASIMSDBLockedResourceTimeout>30</mfCASIMSDBLockedResourceTimeout>
+            <mfCASIMSDBKeyCompression>1</mfCASIMSDBKeyCompression>
+            <mfCASIMSDBIRLMLocking>0</mfCASIMSDBIRLMLocking>
+            <mfCASIMSDBDumpOnLockTimeout>0</mfCASIMSDBDumpOnLockTimeout>
+            <mfCASIMSDBDumpOnDeadlock>0</mfCASIMSDBDumpOnDeadlock>
+            <mfCASIMSDBRollforwardRecovery>0</mfCASIMSDBRollforwardRecovery>
+            <mfCASIMSDBDataCompression>1</mfCASIMSDBDataCompression>
+            <mfCASIMSTMTransThreshold>0</mfCASIMSTMTransThreshold>
+            <mfCASIMSTMMQMaxBlocks>32</mfCASIMSTMMQMaxBlocks>
+            <mfCASIMSTMMQBufferCount>2</mfCASIMSTMMQBufferCount>
+            <mfCASIMSTMMQColdStart>N</mfCASIMSTMMQColdStart>
+            <mfCASIMSTMMQPersistColdStart>0</mfCASIMSTMMQPersistColdStart>
+          </mfServerIMSConfiguration>
+          <mfServerPLIConfiguration>
+            <mfCASPLIUseJavaDebug>0</mfCASPLIUseJavaDebug>
+            <mfCASPLIPromptPLITEST>0</mfCASPLIPromptPLITEST>
+          </mfServerPLIConfiguration>
+        </mfServerCASConfiguration>
+      </mfServerExtendedConfiguration>
+      <mfCommsProcessList>
+        <mfCommsProcess>
+          <objectclass>mfCommsServer</objectclass>
+          <mfStructVersion>5</mfStructVersion>
+          <mfUID>1.2.840.5043.06.005.1614414228.3</mfUID>
+          <mfServerUID>1.2.840.5043.01.026.1614414228.3</mfServerUID>
+          <mfInstance>1</mfInstance>
+          <mfServerStatus>Stopped</mfServerStatus>
+          <mfRequestedEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:6062</mfRequestedEndpoint>
+          <mfActualEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:6062</mfActualEndpoint>
+          <mfSSLCertificate/>
+          <mfSSLKeyfile/>
+          <mfSSLClientOption>1</mfSSLClientOption>
+          <mfSSLMaxKeyLength>0</mfSSLMaxKeyLength>
+          <mfSSLAllowNULLCipher>No</mfSSLAllowNULLCipher>
+          <mfSSLCARootfile/>
+          <mfSSLAllowCertCNIPMismatch>No</mfSSLAllowCertCNIPMismatch>
+          <mfSSLCheckCertRevocation>No</mfSSLCheckCertRevocation>
+          <mfSSLCheckCertPublishersRevocation>No</mfSSLCheckCertPublishersRevocation>
+          <mfSSLHonorServerCipherList>No</mfSSLHonorServerCipherList>
+          <mfTLSProtocols/>
+          <mfTLSCipherSuites/>
+          <mfTLSDHMinimumGroupSize>0</mfTLSDHMinimumGroupSize>
+          <mfTLSCipherGroups/>
+          <mfSSLServerCARootfile/>
+          <mfTLS13CipherSuites/>
+          <mfTLSMiddleBoxCompatibilityMode>Yes</mfTLSMiddleBoxCompatibilityMode>
+          <mfLogPath/>
+          <mfAutoStart>1</mfAutoStart>
+          <mfCustomConfiguration>[soap]
+region=CICSDB1
+</mfCustomConfiguration>
+          <mfListenerList>
+            <mfListener>
+              <objectclass>mflistener</objectclass>
+              <mfStructVersion>18</mfStructVersion>
+              <mfUID>1.2.840.5043.02.018.1614414228.7</mfUID>
+              <mfServerUID>1.2.840.5043.06.005.1614414228.3</mfServerUID>
+              <cn>Web Services and J2EE</cn>
+              <mfListenerStatus>Stopped</mfListenerStatus>
+              <mfRequestedEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:6063</mfRequestedEndpoint>
+              <mfActualEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:0</mfActualEndpoint>
+              <mfConnector>mfcs-mp::mfcs-mp</mfConnector>
+              <mfError>OK</mfError>
+              <description>SOAP/REST Web Services and J2EE</description>
+              <mfSSLCertificate/>
+              <mfSSLKeyfile/>
+              <mfSSLClientOption>1</mfSSLClientOption>
+              <mfSSLMaxKeyLength>0</mfSSLMaxKeyLength>
+              <mfSSLAllowNULLCipher>No</mfSSLAllowNULLCipher>
+              <mfSSLCARootfile/>
+              <mfSSLAllowCertCNIPMismatch>No</mfSSLAllowCertCNIPMismatch>
+              <mfSSLCheckCertRevocation>No</mfSSLCheckCertRevocation>
+              <mfSSLCheckCertPublishersRevocation>No</mfSSLCheckCertPublishersRevocation>
+              <mfSSLHonorServerCipherList>Yes</mfSSLHonorServerCipherList>
+              <mfTLSProtocols/>
+              <mfTLSCipherSuites/>
+              <mfTLSDHMinimumGroupSize>0</mfTLSDHMinimumGroupSize>
+              <mfTLSCipherGroups/>
+              <mfSSLServerCARootfile/>
+              <mfTLS13CipherSuites/>
+              <mfTLSMiddleBoxCompatibilityMode>Yes</mfTLSMiddleBoxCompatibilityMode>
+              <mfCustomConfiguration/>
+            </mfListener>
+            <mfListener>
+              <objectclass>mflistener</objectclass>
+              <mfStructVersion>18</mfStructVersion>
+              <mfUID>1.2.840.5043.02.018.1614414228.8</mfUID>
+              <mfServerUID>1.2.840.5043.06.005.1614414228.3</mfServerUID>
+              <cn>Web</cn>
+              <mfListenerStatus>Disabled</mfListenerStatus>
+              <mfRequestedEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:*</mfRequestedEndpoint>
+              <mfActualEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:0</mfActualEndpoint>
+              <mfConnector>http-switch::http-switch</mfConnector>
+              <mfError>Starting endpoint...</mfError>
+              <description>Basic HTTP web server</description>
+              <mfSSLCertificate/>
+              <mfSSLKeyfile/>
+              <mfSSLClientOption>1</mfSSLClientOption>
+              <mfSSLMaxKeyLength>0</mfSSLMaxKeyLength>
+              <mfSSLAllowNULLCipher>No</mfSSLAllowNULLCipher>
+              <mfSSLCARootfile/>
+              <mfSSLAllowCertCNIPMismatch>No</mfSSLAllowCertCNIPMismatch>
+              <mfSSLCheckCertRevocation>No</mfSSLCheckCertRevocation>
+              <mfSSLCheckCertPublishersRevocation>No</mfSSLCheckCertPublishersRevocation>
+              <mfSSLHonorServerCipherList>Yes</mfSSLHonorServerCipherList>
+              <mfTLSProtocols/>
+              <mfTLSCipherSuites/>
+              <mfTLSDHMinimumGroupSize>0</mfTLSDHMinimumGroupSize>
+              <mfTLSCipherGroups/>
+              <mfSSLServerCARootfile/>
+              <mfTLS13CipherSuites/>
+              <mfTLSMiddleBoxCompatibilityMode>Yes</mfTLSMiddleBoxCompatibilityMode>
+              <mfCustomConfiguration>[virtual paths]
+cgi=&lt;ES&gt;/bin
+uploads=&lt;ES&gt;/deploy
+docs=&lt;ES&gt;/docs/html
+
+[allow]
+cgi=mfdeploy.exe
+uploads=*.txt *.car *.wsdl
+</mfCustomConfiguration>
+            </mfListener>
+            <mfListener>
+              <objectclass>mflistener</objectclass>
+              <mfStructVersion>18</mfStructVersion>
+              <mfUID>1.2.840.5043.02.018.1614414228.9</mfUID>
+              <mfServerUID>1.2.840.5043.06.005.1614414228.3</mfServerUID>
+              <cn>TN3270</cn>
+              <mfListenerStatus>Stopped</mfListenerStatus>
+              <mfRequestedEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:6061</mfRequestedEndpoint>
+              <mfActualEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:0</mfActualEndpoint>
+              <mfConnector>tn3270::tn3270</mfConnector>
+              <mfError>OK</mfError>
+              <description>Default TN3270 listener</description>
+              <mfSSLCertificate/>
+              <mfSSLKeyfile/>
+              <mfSSLClientOption>1</mfSSLClientOption>
+              <mfSSLMaxKeyLength>0</mfSSLMaxKeyLength>
+              <mfSSLAllowNULLCipher>No</mfSSLAllowNULLCipher>
+              <mfSSLCARootfile/>
+              <mfSSLAllowCertCNIPMismatch>No</mfSSLAllowCertCNIPMismatch>
+              <mfSSLCheckCertRevocation>No</mfSSLCheckCertRevocation>
+              <mfSSLCheckCertPublishersRevocation>No</mfSSLCheckCertPublishersRevocation>
+              <mfSSLHonorServerCipherList>Yes</mfSSLHonorServerCipherList>
+              <mfTLSProtocols/>
+              <mfTLSCipherSuites/>
+              <mfTLSDHMinimumGroupSize>0</mfTLSDHMinimumGroupSize>
+              <mfTLSCipherGroups/>
+              <mfSSLServerCARootfile/>
+              <mfTLS13CipherSuites/>
+              <mfTLSMiddleBoxCompatibilityMode>Yes</mfTLSMiddleBoxCompatibilityMode>
+              <mfCustomConfiguration/>
+            </mfListener>
+          </mfListenerList>
+        </mfCommsProcess>
+      </mfCommsProcessList>
+      <mfHandlerList>
+        <mfHandler>
+          <objectclass>mfHandler</objectclass>
+          <mfStructVersion>2</mfStructVersion>
+          <mfUID>1.2.840.5043.05.002.1613400791.1</mfUID>
+          <mfServerUID>1.2.840.5043.01.026.1614414228.3</mfServerUID>
+          <cn>MFRHBINP</cn>
+          <mfHandlerStatus>Enabled</mfHandlerStatus>
+          <description>Handles J2EE requests</description>
+          <mfCustomConfiguration/>
+          <mfHandlerPath/>
+        </mfHandler>
+        <mfHandler>
+          <objectclass>mfHandler</objectclass>
+          <mfStructVersion>2</mfStructVersion>
+          <mfUID>1.2.840.5043.05.002.1613400791.2</mfUID>
+          <mfServerUID>1.2.840.5043.01.026.1614414228.3</mfServerUID>
+          <cn>MFRHSOAP</cn>
+          <mfHandlerStatus>Enabled</mfHandlerStatus>
+          <description>Handles SOAP requests</description>
+          <mfCustomConfiguration/>
+          <mfHandlerPath/>
+        </mfHandler>
+        <mfHandler>
+          <objectclass>mfHandler</objectclass>
+          <mfStructVersion>2</mfStructVersion>
+          <mfUID>1.2.840.5043.05.002.1613400791.3</mfUID>
+          <mfServerUID>1.2.840.5043.01.026.1614414228.3</mfServerUID>
+          <cn>MFRHJCL</cn>
+          <mfHandlerStatus>Enabled</mfHandlerStatus>
+          <description>Handles batch requests</description>
+          <mfCustomConfiguration/>
+          <mfHandlerPath/>
+        </mfHandler>
+        <mfHandler>
+          <objectclass>mfHandler</objectclass>
+          <mfStructVersion>2</mfStructVersion>
+          <mfUID>1.2.840.5043.05.002.1613400791.4</mfUID>
+          <mfServerUID>1.2.840.5043.01.026.1614414228.3</mfServerUID>
+          <cn>MFRHJSON</cn>
+          <mfHandlerStatus>Enabled</mfHandlerStatus>
+          <description>Handles REST requests</description>
+          <mfCustomConfiguration/>
+          <mfHandlerPath/>
+        </mfHandler>
+      </mfHandlerList>
+      <mfServiceList>
+        <mfService>
+          <objectclass>mfService</objectclass>
+          <mfStructVersion>16</mfStructVersion>
+          <mfUID>1.2.840.5043.03.016.1613400791.1</mfUID>
+          <mfServerUID>1.2.840.5043.01.026.1614414228.3</mfServerUID>
+          <cn>Deployer</cn>
+          <mfSearchOrder>1</mfSearchOrder>
+          <mfServiceStatus>Available</mfServiceStatus>
+          <mfServiceClass>MF deployment</mfServiceClass>
+          <description>Deployment file-upload service</description>
+          <mfTRMode>Unknown</mfTRMode>
+          <mfLogMode>Off</mfLogMode>
+          <mfError/>
+          <mfCustomConfiguration>[MF client]
+scheme=http
+URL=/cgi/mfdeploy.exe/uploads
+accept=application/x-zip-compressed
+
+[destination]
+listener=Web Services and J2EE
+</mfCustomConfiguration>
+          <mfListenerUID>
+            <mfUID>1.2.840.5043.02.018.1614414228.8</mfUID>
+          </mfListenerUID>
+        </mfService>
+        <mfService>
+          <objectclass>mfService</objectclass>
+          <mfStructVersion>16</mfStructVersion>
+          <mfUID>1.2.840.5043.03.016.1613400791.2</mfUID>
+          <mfServerUID>1.2.840.5043.01.026.1614414228.3</mfServerUID>
+          <cn>ES</cn>
+          <mfSearchOrder>1</mfSearchOrder>
+          <mfServiceStatus>Available</mfServiceStatus>
+          <mfServiceClass>MF ES</mfServiceClass>
+          <description>ES utility service</description>
+          <mfTRMode>Unknown</mfTRMode>
+          <mfLogMode>Off</mfLogMode>
+          <mfError/>
+          <mfCustomConfiguration/>
+          <mfListenerUID>
+            <mfUID>1.2.840.5043.02.018.1614414228.7</mfUID>
+          </mfListenerUID>
+        </mfService>
+        <mfService>
+          <objectclass>mfService</objectclass>
+          <mfStructVersion>16</mfStructVersion>
+          <mfUID>1.2.840.5043.03.016.1613400791.3</mfUID>
+          <mfServerUID>1.2.840.5043.01.026.1614414228.3</mfServerUID>
+          <cn>CICS</cn>
+          <mfSearchOrder>1</mfSearchOrder>
+          <mfServiceStatus>Available</mfServiceStatus>
+          <mfServiceClass>MF CICS</mfServiceClass>
+          <description>CICS utility service</description>
+          <mfTRMode>Unknown</mfTRMode>
+          <mfLogMode>Off</mfLogMode>
+          <mfError/>
+          <mfCustomConfiguration/>
+          <mfListenerUID>
+            <mfUID>1.2.840.5043.02.018.1614414228.7</mfUID>
+          </mfListenerUID>
+        </mfService>
+        <mfService>
+          <objectclass>mfService</objectclass>
+          <mfStructVersion>16</mfStructVersion>
+          <mfUID>1.2.840.5043.03.016.1613400791.4</mfUID>
+          <mfServerUID>1.2.840.5043.01.026.1614414228.3</mfServerUID>
+          <cn>JES</cn>
+          <mfSearchOrder>1</mfSearchOrder>
+          <mfServiceStatus>Available</mfServiceStatus>
+          <mfServiceClass>MF JES</mfServiceClass>
+          <description>Job Entry Subsystem service</description>
+          <mfTRMode>Unknown</mfTRMode>
+          <mfLogMode>Off</mfLogMode>
+          <mfError/>
+          <mfCustomConfiguration/>
+          <mfListenerUID>
+            <mfUID>1.2.840.5043.02.018.1614414228.7</mfUID>
+          </mfListenerUID>
+        </mfService>
+      </mfServiceList>
+      <mfPackageList/>
+      <mfXRMList>
+        <mfXRM>
+          <objectclass>mfPackage</objectclass>
+          <mfStructVersion>1</mfStructVersion>
+          <mfUID>1.2.840.5043.07.001.1614348798.1</mfUID>
+          <mfServerUID>1.2.840.5043.01.026.1614414228.3</mfServerUID>
+          <cn>DB2P</cn>
+          <mfXRMName>Postgres</mfXRMName>
+          <mfXRMLabel>DB2P</mfXRMLabel>
+          <mfXRMType>XA</mfXRMType>
+          <mfXRMModule>$MFROOT/xa/ESODBCXA64.so</mfXRMModule>
+          <description/>
+          <mfXRMReconnect>1</mfXRMReconnect>
+          <mfXRMStatus>Enabled</mfXRMStatus>
+          <mfXRMOpenString>DSN=PG.VSAMDATA,USRPASS=postgres.mypassword,ESLOGGING=0001</mfXRMOpenString>
+          <mfXRMCloseString/>
+        </mfXRM>
+      </mfXRMList>
+      <mfJESInitiatorList>
+        <mfJESInitiator>
+          <objectclass>mfJESInitiator</objectclass>
+          <mfStructVersion>1</mfStructVersion>
+          <mfUID>1.3.6.1.4.1.5043.1.21.12.6038e807.79834.139784005615618</mfUID>
+          <mfServerUID>1.2.840.5043.01.026.1614414228.3</mfServerUID>
+          <cn>ABC123</cn>
+          <mfJESInitiatorClass>ABC123</mfJESInitiatorClass>
+          <description>ABC123</description>
+        </mfJESInitiator>
+        <mfJESInitiator>
+          <objectclass>mfJESInitiator</objectclass>
+          <mfStructVersion>1</mfStructVersion>
+          <mfUID>1.3.6.1.4.1.5043.1.21.12.6038e91e.79834.139779710648323</mfUID>
+          <mfServerUID>1.2.840.5043.01.026.1614414228.3</mfServerUID>
+          <cn>Init2</cn>
+          <mfJESInitiatorClass>ABC123</mfJESInitiatorClass>
+          <description/>
+        </mfJESInitiator>
+      </mfJESInitiatorList>
+      <mfJESPrinterList/>
+      <mfIMSMPRList/>
+      <mfMQListenerList/>
+    </mfServer>
+  </mfServerList>
+
+</mfDirectoryServerRepository>

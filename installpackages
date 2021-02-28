@@ -1,0 +1,36 @@
+#! /bin/sh
+ls
+yum -y install coreutils
+yum -y install mlocate
+yum -y install git
+yum -y install postgresql-client
+yum -y install postgresql-server
+yum -y install postgresql-contrib
+yum -y install postgresql-devel
+yum -y install pgadmin4
+yum -y install postgresql-odbc
+yum -y install unixODBC*
+yum -y install unixODBC*.i686
+yum -y install java-1.8.0-openjdk
+yum -y install strace
+yum -y install ed
+yum -y install spax
+yum -y install libgcc*i686*
+yum -y install libstdc++*i686*
+yum -y install glibc-devel*i686*
+yum -y install gcc
+yum -y install cpp
+yum -y install glibc-devel
+yum -y install ksh
+rpm -i https://ftp.postgresql.org/pub/pgadmin/pgadmin4/yum/pgadmin4-redhat-repo-1-1.noarch.rpm
+dnf -y install pgadmin4-web  
+/usr/pgadmin4/bin/setup-web.sh
+
+postgresql-setup --initdb
+systemctl enable postgresql.service
+systemctl start postgresql.service
+
+
+
+
+

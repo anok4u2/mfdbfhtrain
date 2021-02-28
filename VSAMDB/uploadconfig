@@ -1,0 +1,7 @@
+#! /bin/sh
+
+dbfhdeploy data add ../cics/dfhdrdat sql://myserver/VSAMDATA/dfhdrdat?folder=/CONFIG
+
+
+
+

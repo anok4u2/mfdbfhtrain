@@ -1,0 +1,345 @@
+#!/bin/ksh
+
+#  Build script for Micro Focus XA switch modules
+#  Copyright (C) Micro Focus 2003-2019. All rights reserved.
+
+# @(#)build $Revision: 1038748 $
+
+test `uname -s` = Linux && echocmd="echo -e" || echocmd="echo"
+
+function usage
+{
+	$echocmd "usage :"
+	$echocmd "build [ db2 | ora | oci | odbc | pg | ext] [ -o ] [ -r ]"
+	$echocmd ""
+	$echocmd "-o should be used to build the DB2 switch module if both DB2 and ODBC switches are used in a single region."
+	$echocmd "-r enables the logic to check for failed connection and to reconnect. It only works static switches."
+	return 1
+}
+
+function builderror
+{
+	$echocmd "Error linking switch load module. Please verify that your"
+	$echocmd "COBOL and Database environment is set up correctly."
+	return 2
+}
+
+function builderror1
+{
+        $echocmd "Error linking switch load module. Please verify that your"
+        $echocmd "COBOL, ODBC and Database environment is set up correctly."
+        return 2
+}
+
+function builderror2
+{
+        $echocmd "Please verify that the environment variable $LIBODBCDIR is"
+        $echocmd "set to the directory containing the ODBC Driver Manager"
+        $echocmd "library files."
+        $echocmd "e.g. LIBODBCDIR=/opt/unixODBC/lib"
+        return 2
+}
+
+function builderror3
+{
+	$echocmd "Oracle switch load module has not been built correctly."
+	$echocmd "Please contact Micro Focus SupportLine, having logged the output of"
+	$echocmd "\n\$SHELL -x ./build ora"
+	return 3
+}
+
+function builderror4
+{
+	$echocmd "External Configuration module has not been built correctly."
+	$echocmd "Please verify that your COBOL environment is set up correctly."
+	return 4
+}
+
+if test $# -lt 1 -o $# -gt 2
+then
+	usage
+	exit 1
+fi
+
+param=`echo $1 | tr "[a-z]" "[A-Z]"`
+param2=`echo $2`
+param3=`echo $3`
+odbcdb2=0
+reconn=0
+echo > _mfxasw.dir
+
+if test $# -gt 1
+then
+   if test x.$param2 = x.-o
+   then
+      odbcdb2=1
+   else
+      if test x.$param2 = x.-r
+      then
+         reconn=1
+      else
+         usage
+         exit 1
+      fi
+   fi
+fi
+
+if test $# = 3
+then
+   if test x.$param3 = x.-o
+   then
+      odbcdb2=1
+   else
+      if test x.$param3 = x.-r
+      then
+         reconn=1
+      else
+         usage
+         exit 1
+      fi
+   fi
+fi
+
+if test x.$COBDIR = x.
+then
+	builderror
+	exit 2
+fi
+
+if test -f $COBDIR/bin/cobmode
+then
+	cm=`cobmode | awk '{print $5}'`
+else
+	cm=64
+fi
+if test x.$cm = x.
+then
+	echo building 32-bit switch module...
+else
+	echo building ${cm}-bit switch module...
+fi
+
+if test x.$cm = x.64
+then
+	SUFF=64
+	ESQLOCISO=cobesqloci64.so
+else
+	SUFF=
+	ESQLOCISO=cobesqloci.so
+fi
+
+	ESOCISO=ESOCIXA$SUFF.so
+	ESORASO=ESORAXA$SUFF.so
+  ESXASUPPSO=esxasupp$SUFF.so
+       MFJMVSSO=cobmfjmvs$SUFF.so
+       MFDBFHSO=cobmfdbfh$SUFF.so
+
+	eslibdir=\$LD_LIBRARY_PATH
+
+COBCPY=$COBDIR/cpylib:$COBCPY
+export COBCPY
+
+XAOPTS="-d mfxaGetJclUser@$ESXASUPPSO -d mfxaGetRegionInfo@$ESXASUPPSO -d mfxaGetSepType@$ESXASUPPSO -d mfxaGetTxUser@$ESXASUPPSO -d mfxaPutConsoleMsg@$ESXASUPPSO -d mfxaGetEotFlag@$ESXASUPPSO -d mfxaLogConsoleMsg@$ESXASUPPSO -d MFDBFH@$MFDBFHSO -d MFDBFH_XA_CONNECTION_REGISTER@$MFDBFHSO -d MFDBFH_XA_CONNECTION_REGISTER_CREDENTIALS@$MFDBFHSO -d MFDBFH_XA_CONNECTION_DEREGISTER@$MFDBFHSO -d ESXAEXTCFG@ESXAEXTCFG$SUFF.so"
+
+case $param in
+ODBC)
+        if test $reconn = 1
+        then
+           echo CONSTANT XA-RECONNECT \"1\" > _mfxasw.dir
+        fi
+	XAOPTS2="-d SQLGetConnectAttr@libodbc.so -d SQLSetConnectAttr@libodbc.so -d SQLGetDiagRec@libodbc.so -d SQLGetInfo@libodbc.so"
+	cob -z,sys,nounload ESODBCXA.CBL -C 'CONSTANT DYNAMICREGISTRATION "N"' -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT XABUILD "ODBC"' -oESODBCXA$SUFF.so $XAOPTS $XAOPTS2 -C 'USE"_mfxasw.dir"'
+	bldrtn=$?
+	if test $bldrtn -ne 0
+	then
+		builderror1
+		exit 2
+	fi
+	cp -p ESODBCXA.CBL ESODBCXA_D.CBL
+	cob -z,sys,nounload ESODBCXA_D.CBL -C 'CONSTANT DYNAMICREGISTRATION "Y"' -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT XABUILD "ODBC"' -oESODBCXA${SUFF}_D.so $XAOPTS -d ax_reg@casaxlib$SUFF.so $XAOPTS2
+	bldrtn=$?
+	if test $bldrtn -ne 0
+	then
+		builderror1
+		exit 2
+	fi
+	rm -f ESODBCXA*.i?? ESODBCXA*.o ESODBCXA_D.CBL _mfxasw.dir > /dev/null 2>&1 
+	XAOPTS2=
+	;;
+PG)
+        if test $reconn = 1
+        then
+           echo CONSTANT XA-RECONNECT \"1\" > _mfxasw.dir
+        fi
+	XAOPTS2="-d SQLGetConnectAttr@libodbc.so -d SQLSetConnectAttr@libodbc.so -d SQLGetDiagRec@libodbc.so -d SQLGetInfo@libodbc.so"
+	cob -z,sys,nounload ESPGSQLXA.CBL -C 'CONSTANT DYNAMICREGISTRATION "Y"' -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT XABUILD "PGSQL"' -oESPGSQLXA$SUFF.so $XAOPTS -d ax_reg@casaxlib$SUFF.so $XAOPTS2
+	bldrtn=$?
+	if test $bldrtn -ne 0
+	then
+		builderror1
+		exit 2
+	fi
+	cp -p ESPGSQLXA.CBL ESPGSQLXA_S.CBL
+	cob -z,sys,nounload ESPGSQLXA_S.CBL -C 'CONSTANT DYNAMICREGISTRATION "N"' -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT XABUILD "PGSQL"' -oESPGSQLXA${SUFF}_S.so $XAOPTS $XAOPTS2 -C 'USE"_mfxasw.dir"'
+	bldrtn=$?
+	if test $bldrtn -ne 0
+	then
+		builderror1
+		exit 2
+	fi
+	rm -f ESPGSQLXA*.i?? ESPGSQLXA*.o ESPGSQLXA_S.CBL _mfxasw.dir > /dev/null 2>&1
+	XAOPTS2=
+	;;
+DB2)
+	if test x.$DB2INSTANCE = x.
+	then
+		builderror
+		exit 2
+	fi
+
+	if test x.$cm = x.64
+	then
+		db2_libdir=lib64
+		cobdb2so=cobdb264
+	else
+		db2_libdir=lib32
+		cobdb2so=cobdb2
+	fi
+        if test $reconn = 1
+        then
+           echo CONSTANT XA-RECONNECT \"1\" > _mfxasw.dir
+        fi
+
+	effective_db2libdir=`eval echo ~$DB2INSTANCE`/sqllib/$db2_libdir
+
+	XAOPTS="$XAOPTS -d MFJXABND@$MFJMVSSO"
+
+	XAOPTS2="-d db2xacic_std@libdb2.so -d SQLGetConnectAttr@libdb2.so -d SQLEndTran@libdb2.so -d SQLSetConnection@libdb2.so -d SQLSetConnectAttr@libdb2.so -d SQLAllocHandle@libdb2.so -d SQLExecDirect@libdb2.so -d SQLFreeHandle@libdb2.so -d SQLGetDiagRec@libdb2.so -d SQLSetEnvAttr@libdb2.so -d SQLConnect@libdb2.so -d SQLDisconnect@libdb2.so -d SQLPrepare@libdb2.so -d SQLExecute@libdb2.so -d SQLFetchScroll@libdb2.so -d SQLGetData@libdb2.so -d SQLCloseCursor@libdb2.so"
+
+	if test x.$param2 = x.-o
+	then
+		cob -z,sys,nounload ESDB2XA.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "Y"' -oESDB2XA$SUFF.so $XAOPTS -d ax_reg@casaxlib$SUFF.so $XAOPTS2 -d SQLFreeEnv@libodbc.so -C 'CONSTANT LOAD-ODBC "1"'
+	else
+		cob -z,sys,nounload ESDB2XA.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "Y"' -oESDB2XA$SUFF.so $XAOPTS -d ax_reg@casaxlib$SUFF.so $XAOPTS2
+	fi
+	bldrtn=$?
+
+	# Verify that the switch module has been built correctly
+
+	if test $bldrtn -ne 0
+	then
+		builderror
+		exit 2
+	fi
+
+	cp -p ESDB2XA.CBL ESDB2XA_S.CBL
+	if test x.$param2 = x.-o
+	then
+		cob -z,sys,nounload ESDB2XA_S.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "N"' -oESDB2XA${SUFF}_S.so $XAOPTS $XAOPTS2 -d SQLFreeEnv@libodbc.so -C 'CONSTANT LOAD-ODBC "1"' -C 'USE"_mfxasw.dir"'
+	else
+		cob -z,sys,nounload ESDB2XA_S.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "N"' -oESDB2XA${SUFF}_S.so $XAOPTS $XAOPTS2 -C 'USE"_mfxasw.dir"'
+	fi
+	bldrtn=$?
+
+	rm -f ESDB2*.i?? ESDB2*.o ESDB2XA_S.CBL _mfxasw.dir > /dev/null 2>&1
+
+	# Verify that the switch module has been built correctly
+
+	if test $bldrtn -ne 0
+	then
+		builderror
+		exit 2
+	fi
+	;;
+
+ORA|OCI)
+	if test x.$ORACLE_HOME = x.
+	then
+		builderror
+		exit 2
+	fi
+
+	if test x.$cm = x.64
+	then
+		oracle_libdir=lib
+	else
+		if test -d $ORACLE_HOME/lib32
+		then
+			oracle_libdir=lib32
+		else
+			oracle_libdir=lib
+		fi
+	fi
+
+        if test $reconn = 1
+        then
+           echo CONSTANT XA-RECONNECT \"1\" > _mfxasw.dir
+        fi
+
+	case $param in
+	OCI|ORA)
+# Build flags for x86 and zSeries running Linux
+		COBFLAGS="`cat $ORACLE_HOME/$oracle_libdir/ldflags`   `cat $ORACLE_HOME/$oracle_libdir/sysliblist` -ldl -lm  "
+		case $param in
+		OCI)
+			OPC_OPTS="-d oqlbindxa@$ESQLOCISO -d oqlunbindxa@$ESQLOCISO $XAOPTS"
+			cob -z,sys,nounload ES${param}XA.CBL -C 'CONSTANT DYNAMICREGISTRATION "N"' -C 'CONSTANT XAPLATFORM "UNIX"' -to ES${param}XA$SUFF.so -e "" -L/bin/unix -L$ORACLE_HOME/$oracle_libdir/ $ORACLE_HOME/precomp/$oracle_libdir/cobsqlintf.o -lclntsh $COBFLAGS $OPC_OPTS -C 'USE"_mfxasw.dir"'
+			bldrtn=$?
+			cp -p ESOCIXA.CBL ESOCIXA_D.CBL
+			cob -z,sys,nounload ES${param}XA_D.CBL -C 'CONSTANT DYNAMICREGISTRATION "Y"' -C 'CONSTANT XAPLATFORM "UNIX"' -to ES${param}XA${SUFF}_D.so -e "" -L/bin/unix -L$ORACLE_HOME/$oracle_libdir/ $ORACLE_HOME/precomp/$oracle_libdir/cobsqlintf.o -lclntsh $COBFLAGS $OPC_OPTS  -d ax_reg@casaxlib$SUFF.so
+			rm -f ESOCIXA_D.CBL ESOCIXA_D.i?? ESOCIXA_D.o _mfxasw.dir > /dev/null 2>&1
+                        ;;
+		ORA)	cob -z,sys,nounload -t ES${param}XA.CBL -C 'CONSTANT DYNAMICREGISTRATION "N"' -C 'CONSTANT XAPLATFORM "UNIX"' -oES${param}XA$SUFF.so -e "" -L/bin/unix -L$ORACLE_HOME/$oracle_libdir/ $ORACLE_HOME/precomp/$oracle_libdir/cobsqlintf.o -lclntsh $COBFLAGS $XAOPTS -C 'USE"_mfxasw.dir"'
+			cp -p ESORAXA.CBL ESORAXA_D.CBL
+			cob -z,sys,nounload -tk ES${param}XA_D.CBL -C 'CONSTANT DYNAMICREGISTRATION "Y"' -C 'CONSTANT XAPLATFORM "UNIX"' -oES${param}XA${SUFF}_D.so -e "" -L/bin/unix -L$ORACLE_HOME/$oracle_libdir/ $ORACLE_HOME/precomp/$oracle_libdir/cobsqlintf.o -lclntsh $COBFLAGS $XAOPTS -d ax_reg@casaxlib$SUFF.so
+			rm -f ESORAXA_D.CBL ESORAXA_D.i?? ESORAXA_D.o _mfxasw.dir > /dev/null 2>&1
+                        ;;
+		esac
+
+		bldrtn=$?
+		;;
+
+	esac
+		
+	# Verify that the switch module has been built correctly
+
+	if test $bldrtn -ne 0
+	then
+		builderror3
+		exit 2
+	fi
+
+	$echocmd "\nIf you intend to execute JES-initiated transactions under Enterprise Server,"
+	case $param in
+	OCI)
+		$echocmd "then $ESOCISO needs to reside in a directory included in your";;
+	ORA)
+		$echocmd "then $ESORASO needs to reside in a directory included in your";;
+	esac
+	$echocmd "$eslibdir setting, such as \$COBDIR/lib."
+	$echocmd "\nIf you do not do so, then such transactions will not be able to communicate"
+	$echocmd "with the database server."
+
+	rm -f ESO*.i?? ESO*.o _mfxasw.dir > /dev/null 2>&1
+	;;
+EXT)
+        
+        cp ESXAEXTCFG.CBL ESXAEXTCFG64.CBL
+        cob -z,sys,nounload ESXAEXTCFG${SUFF}.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -oESXAEXTCFG${SUFF}.so -d mfsecretsapi${SUFF}@mfsecretsapi${SUFF}.so -d MfsaOpenVault@mfsecretsapi${SUFF}.so -d MfsaReadSecret@mfsecretsapi${SUFF}.so -d MfsaCloseVault@mfsecretsapi${SUFF}.so 
+	    rm -f ESXAEXTCFG*.i?? ESXAEXTCFG*.o ESXAEXTCFG64.CBL _mfxasw.dir > /dev/null 2>&1
+
+	bldrtn=$?
+	if test $bldrtn -ne 0
+	then
+		builderror4
+		exit 2
+	fi
+	;;
+
+*)
+	usage
+	exit 1
+	;;
+esac
+
+exit 0

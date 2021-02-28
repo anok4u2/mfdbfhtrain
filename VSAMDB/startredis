@@ -1,0 +1,8 @@
+#! /bin/sh
+cd redis
+cp ../redis.conf .
+redis-server64 $PWD/redis.conf &
+
+
+
+

@@ -1,0 +1,13 @@
+mccerror.txt
+MFDBFH.cfg
+create_crossregion_pg.sql
+create_region_MYPAC_pg.sql
+*.rdb
+*.int
+*.so
+*.idy
+*.o
+ACCTFIL
+data/*.dat
+data/*.DAT
+

@@ -1,0 +1,26 @@
+#! /bin/sh
+export USEDB=localhost
+export PGPASSWORD=mypassword
+
+# copy odbc.ini into /etc
+cp odbc.ini /etc/odbc.ini
+
+
+# First Create the MFDBFH.cfg
+rm MFDBFH.cfg
+dbfhconfig @mfdbfhcommands.txt
+
+# Create the datastore
+dbfhdeploy data create sql://MYSERVER/VSAMDATA
+
+# Create the region database
+dbfhadmin -script -type:region -provider:pg -name:MYPAC -file:create_region_MYPAC_pg.sql
+dbfhadmin -createdb -usedb:%USEDB% -provider:pg -type:region -name:MYPAC -file:create_region_MYPAC_pg.sql -user:postgres -password:mypassword
+
+# Create the crossregion database
+dbfhadmin -script -type:crossregion -provider:pg -file:create_crossregion_pg.sql
+dbfhadmin -createdb -usedb:%USEDB% -provider:pg -type:crossregion -file:create_crossregion_pg.sql -user:postgres -password:mypassword
+
+
+
+

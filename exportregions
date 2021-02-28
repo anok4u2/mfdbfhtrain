@@ -1,0 +1,4 @@
+#! /bin/sh
+mfds -x 5 $PWD CICSDB1
+mfds -x 5 $PWD CICSDB2
+

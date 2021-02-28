@@ -1,0 +1,8 @@
+#! /bin/sh
+/var/microfocuslicensing/bin/startboth.sh 
+. /opt/microfocus/EnterpriseDeveloper/bin/cobsetenv
+mfds &
+escwa &
+
+
+

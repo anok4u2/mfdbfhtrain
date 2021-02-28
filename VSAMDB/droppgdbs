@@ -1,0 +1,7 @@
+#! /bin/sh
+export PGPASSWORD=mypassword
+psql postgres postgres -f dropdbs.sql
+
+
+
+
