@@ -1,0 +1,4 @@
+#! /bin/sh
+caspac -aLoad="MSG1.so" -sredis,127.0.0.1:6379
+
+
