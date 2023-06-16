@@ -26,6 +26,8 @@ yum -y install net-tools
 rpm -i https://ftp.postgresql.org/pub/pgadmin/pgadmin4/yum/pgadmin4-redhat-repo-2-1.noarch.rpm
 dnf -y install pgadmin4-web  
 /usr/pgadmin4/bin/setup-web.sh
+chcon -R -t httpd_sys_content_rw_t "/var/log/pgadmin/"
+chcon -R -t httpd_sys_content_rw_t "/var/lib/pgadmin/"
 
 postgresql-setup --initdb
 systemctl enable postgresql.service
