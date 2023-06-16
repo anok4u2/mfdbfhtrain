@@ -23,7 +23,7 @@ yum -y install cpp
 yum -y install glibc-devel
 yum -y install ksh
 yum -y install net-tools
-rpm -i https://ftp.postgresql.org/pub/pgadmin/pgadmin4/yum/pgadmin4-redhat-repo-1-1.noarch.rpm
+rpm -i https://ftp.postgresql.org/pub/pgadmin/pgadmin4/yum/pgadmin4-redhat-repo-2-1.noarch.rpm
 dnf -y install pgadmin4-web  
 /usr/pgadmin4/bin/setup-web.sh
 
