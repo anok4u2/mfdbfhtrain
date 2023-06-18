@@ -5,7 +5,7 @@ After=default.target
 [Service]
 Type=simple
 RemainAfterExit=yes
-ExecStart=/home/ec2-user/mfdbfhtrain/startmfds
+ExecStart=/bin/sh /home/ec2-user/mfdbfhtrain/startmfds
 TimeoutStartSec=0
 
 [Install]

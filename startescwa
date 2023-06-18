@@ -1,5 +1,5 @@
 #!/bin/sh
 . /opt/microfocus/EnterpriseDeveloper/bin/cobsetenv
 export MF_ROOT_CERT=/home/ec2-user/SSLCERT/CARootcert.pem
-escwa -c $PWD/escwa/commonwebadmin8.json --write=true < /dev/null > /tmp/escwa8.out 2>&1 &
+escwa -c /home/ec2-user/mfdbfhtrain/escwa/commonwebadmin8.json --write=true < /dev/null > /tmp/escwa8.out 2>&1 &
 
