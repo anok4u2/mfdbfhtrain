@@ -58,6 +58,10 @@
        01  Xai-retcode                     PIC S9(4) COMP-5.
 
        01 CustomizationExitRoutine     PROCEDURE-POINTER.
+
+       01 OracleCustomExitRoutine          PROCEDURE-POINTER.
+
+       01 DB2CustomExitRoutine             PROCEDURE-POINTER.
        
        01 ImpersonatedUserLen              BINARY-LONG VALUE 5.
        
@@ -259,6 +263,7 @@
        78  78-MFDBFH-CONN-REG-FLAGS-SQLSERVER      value h'00000001'.
        78  78-MFDBFH-CONN-REG-FLAGS-POSTGRESQL     value h'00000002'.
        78  78-MFDBFH-CONN-REG-FLAGS-DB2            value h'00000003'.
+       78  78-MFDBFH-CONN-REG-FLAGS-ORACLE         value h'00000004'.
 
        78  78-MFDBFH-CONN-REG-RC-SUCCESS           value 0.
        78  78-MFDBFH-CONN-REG-RC-INV-CONN-TYPE     value 1.
@@ -268,12 +273,14 @@
        78  78-MFDBFH-CONN-REG-RC-NOT-FOUND         value 5.
 
        78  78-MFDBFH-CONN-REG-TYPE-ODBC            value 0.
+       78  78-MFDBFH-CONN-REG-TYPE-OCI             value 1.
 
        01.
            03  ws-mfdbfh-connection-reg-flags      binary-long value 78-MFDBFH-CONN-REG-FLAGS-NONE.
            03  ws-mfdbfh-connection-dereg-pptr     procedure-pointer value null.
            03  ws-mfdbfh-connection-reg-pptr       procedure-pointer value null.
            03  ws-mfdbfh-connection-reg-cred-pptr  procedure-pointer value null.
+           03  ws-mfdbfh-invocation-observer-pptr  procedure-pointer value null.
            03  ws-mfdbfh-pptr                      procedure-pointer value null.
            03  ws-mfdbfh-rc                        binary-long.
            03  ws-mfdbfh-rc-display                pic s9(9).
@@ -342,6 +349,7 @@
        78  PROPNAME-ORA-PREPARE        VALUE "ESORAXA xa_prepare".
        78  PROPNAME-ORA-RECOVER        VALUE "ESORAXA xa_recover".
        78  PROPNAME-ORA-AXREG          VALUE "ESORAXA ax_reg".
+       78  PROPNAME-ORA-XAPING         VALUE "ESORAXA xa_ping".
        78  PROPNAME-ORAOPC-OPEN        VALUE "ESORAOPC connect".
        78  PROPNAME-ORAOPC-COMMIT      VALUE "ESORAOPC commit".
        78  PROPNAME-ORAOPC-ROLLBACK    VALUE "ESORAOPC rollback".
@@ -464,6 +472,7 @@
            03           PIC X(20) VALUE PROPNAME-ORA-PREPARE.
            03           PIC X(20) VALUE PROPNAME-ORA-RECOVER.
            03           PIC X(20) VALUE PROPNAME-ORA-AXREG.
+           03           PIC X(20) VALUE PROPNAME-ORA-XAPING.
            03           PIC X(20) VALUE PROPNAME-ORAOPC-OPEN.
            03           PIC X(20) VALUE PROPNAME-ORAOPC-COMMIT.
            03           PIC X(20) VALUE PROPNAME-ORAOPC-ROLLBACK.
@@ -528,7 +537,7 @@
            03           PIC X(20) VALUE PROPNAME-PGSQL-SETCONN.
            03           PIC X(20) VALUE spaces.
        01  ws-prop-name REDEFINES ws-prop-names
-                        PIC X(20) OCCURS 121.
+                        PIC X(20) OCCURS 122.
       *----------------------------------------------------------------
       *    THIS_COMPONENT events
       *----------------------------------------------------------------
@@ -603,6 +612,7 @@
        78  EVENT-ORA-RECOVER                 VALUE 91.
        78  EVENT-ORA-AXREG                   VALUE 92.
        78  EVENT-ORA-SETISOLEVEL             VALUE 93.
+       78  EVENT-ORA-XAPING                  VALUE 94.
 
        78  EVENT-ORAOPC-OPEN-BADOPENSTRING   VALUE 101.
        78  EVENT-ORAOPC-OPEN-CONNECT         VALUE 102.
@@ -796,7 +806,9 @@
        01  resultCode                  PIC s9(4) comp-5.
 
       $if MFDBFH-SUPPORT defined
+       01  ls-cancel-proc-params       cblt-cancel-proc-params.
        01  ls-mfdbfh-pptr              procedure-pointer.
+       01  ls-mfdbfh-observer-pptr     procedure-pointer.
       $end MFDBFH-SUPPORT defined
 
        01 ls-swtype                          PIC X COMP-X. 
@@ -808,9 +820,15 @@
 
        01 lk-xid.
       $IF P64 SET
+      $    IF XAPLATFORM = "WINDOWS"
+           03 lk-xid-formatid          PIC S9(9) COMP-5.
+           03 lk-xid-gtrid-length      PIC S9(9) COMP-5.
+           03 lk-xid-bqual-length      PIC S9(9) COMP-5.
+      $    ELSE
            03 lk-xid-formatid          PIC S9(18) COMP-5.
            03 lk-xid-gtrid-length      PIC S9(18) COMP-5.
            03 lk-xid-bqual-length      PIC S9(18) COMP-5.
+      $    END-IF
       $ELSE
            03 lk-xid-formatid          PIC S9(9) COMP-5.
            03 lk-xid-gtrid-length      PIC S9(9) COMP-5.

@@ -3,14 +3,14 @@
 #  Build script for Micro Focus XA switch modules
 #  Copyright (C) Micro Focus 2003-2019. All rights reserved.
 
-# @(#)build $Revision: 1038748 $
+# @(#)build $Revision: 1253114 $
 
 test `uname -s` = Linux && echocmd="echo -e" || echocmd="echo"
 
 function usage
 {
 	$echocmd "usage :"
-	$echocmd "build [ db2 | ora | oci | odbc | pg | ext] [ -o ] [ -r ]"
+	$echocmd "build [ db2 | ora | oci | odbc | pg | ext] [ -o ] [ -r ] [ -c ]"
 	$echocmd ""
 	$echocmd "-o should be used to build the DB2 switch module if both DB2 and ODBC switches are used in a single region."
 	$echocmd "-r enables the logic to check for failed connection and to reconnect. It only works static switches."
@@ -55,7 +55,7 @@ function builderror4
 	return 4
 }
 
-if test $# -lt 1 -o $# -gt 2
+if test $# -lt 1 -o $# -gt 3
 then
 	usage
 	exit 1
@@ -66,6 +66,8 @@ param2=`echo $2`
 param3=`echo $3`
 odbcdb2=0
 reconn=0
+customOra=0
+customExt=0
 echo > _mfxasw.dir
 
 if test $# -gt 1
@@ -78,8 +80,14 @@ then
       then
          reconn=1
       else
-         usage
-         exit 1
+         if test x.$param2 = x.-c
+         then
+            customOra=1
+            customExt=1
+         else
+            usage
+            exit 1
+         fi
       fi
    fi
 fi
@@ -94,8 +102,14 @@ then
       then
          reconn=1
       else
-         usage
-         exit 1
+         if test x.$param3 = x.-c
+         then
+            customOra=1
+            customExt=1
+         else
+            usage
+            exit 1
+         fi
       fi
    fi
 fi
@@ -142,6 +156,26 @@ export COBCPY
 XAOPTS="-d mfxaGetJclUser@$ESXASUPPSO -d mfxaGetRegionInfo@$ESXASUPPSO -d mfxaGetSepType@$ESXASUPPSO -d mfxaGetTxUser@$ESXASUPPSO -d mfxaPutConsoleMsg@$ESXASUPPSO -d mfxaGetEotFlag@$ESXASUPPSO -d mfxaLogConsoleMsg@$ESXASUPPSO -d MFDBFH@$MFDBFHSO -d MFDBFH_XA_CONNECTION_REGISTER@$MFDBFHSO -d MFDBFH_XA_CONNECTION_REGISTER_CREDENTIALS@$MFDBFHSO -d MFDBFH_XA_CONNECTION_DEREGISTER@$MFDBFHSO -d ESXAEXTCFG@ESXAEXTCFG$SUFF.so"
 
 case $param in
+MSSQL)
+	XAOPTS2="-d SQLGetConnectAttr@libodbc.so -d SQLSetConnectAttr@libodbc.so -d SQLGetDiagRec@libodbc.so -d SQLGetInfo@libodbc.so"
+	cob -z,sys,nounload ESMSSQL.CBL -C 'CONSTANT VER "17"' -C 'CONSTANT DYNAMICREGISTRATION "N"' -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT XABUILD "SQLSRVR"' -oESMSSQL$SUFF.so $XAOPTS $XAOPTS2 -C 'USE"_mfxasw.dir"'
+	bldrtn=$?
+	if test $bldrtn -ne 0
+	then
+		builderror1
+		exit 2
+	fi
+	cp -p ESMSSQL.CBL ESMSSQL_D.CBL
+	cob -z,sys,nounload ESMSSQL_D.CBL -C 'CONSTANT VER "17"' -C 'CONSTANT DYNAMICREGISTRATION "Y"' -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT XABUILD "SQLSRVR"' -oESMSSQL${SUFF}_D.so $XAOPTS -d ax_reg@casaxlib$SUFF.so $XAOPTS2
+	bldrtn=$?
+	if test $bldrtn -ne 0
+	then
+		builderror1
+		exit 2
+	fi
+	rm -f ESMSSQL*.i?? ESMSSQL*.o ESMSSQL_D.CBL _mfxasw.dir > /dev/null 2>&1 
+	XAOPTS2=
+	;;
 ODBC)
         if test $reconn = 1
         then
@@ -212,15 +246,26 @@ DB2)
 
 	effective_db2libdir=`eval echo ~$DB2INSTANCE`/sqllib/$db2_libdir
 
-	XAOPTS="$XAOPTS -d MFJXABND@$MFJMVSSO"
+	XAOPTS="$XAOPTS -d MFJXABND@$MFJMVSSO -d MFDBFH_INVOCATION_OBSERVER@$MFDBFHSO"
 
 	XAOPTS2="-d db2xacic_std@libdb2.so -d SQLGetConnectAttr@libdb2.so -d SQLEndTran@libdb2.so -d SQLSetConnection@libdb2.so -d SQLSetConnectAttr@libdb2.so -d SQLAllocHandle@libdb2.so -d SQLExecDirect@libdb2.so -d SQLFreeHandle@libdb2.so -d SQLGetDiagRec@libdb2.so -d SQLSetEnvAttr@libdb2.so -d SQLConnect@libdb2.so -d SQLDisconnect@libdb2.so -d SQLPrepare@libdb2.so -d SQLExecute@libdb2.so -d SQLFetchScroll@libdb2.so -d SQLGetData@libdb2.so -d SQLCloseCursor@libdb2.so"
 
-	if test x.$param2 = x.-o
+	if test $odbcdb2 = 1
 	then
-		cob -z,sys,nounload ESDB2XA.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "Y"' -oESDB2XA$SUFF.so $XAOPTS -d ax_reg@casaxlib$SUFF.so $XAOPTS2 -d SQLFreeEnv@libodbc.so -C 'CONSTANT LOAD-ODBC "1"'
+		if test $customExt = 1
+		then
+			cob -z,sys,nounload ESDB2XA.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "Y"' -C 'CONSTANT CUSTOMEXT "Y"' -oESDB2XA$SUFF.so $XAOPTS -d ax_reg@casaxlib$SUFF.so $XAOPTS2 -d SQLFreeEnv@libodbc.so -d ESXACUSTOMEXT@ESXACUSTOMEXT$SUFF.so -C 'CONSTANT LOAD-ODBC "1"'
+		else
+			cob -z,sys,nounload ESDB2XA.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "Y"' -C 'CONSTANT CUSTOMEXT "N"' -oESDB2XA$SUFF.so $XAOPTS -d ax_reg@casaxlib$SUFF.so $XAOPTS2 -d SQLFreeEnv@libodbc.so -d ESXACUSTOMEXT@ESXACUSTOMEXT$SUFF.so -C 'CONSTANT LOAD-ODBC "1"'
+		fi	
 	else
-		cob -z,sys,nounload ESDB2XA.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "Y"' -oESDB2XA$SUFF.so $XAOPTS -d ax_reg@casaxlib$SUFF.so $XAOPTS2
+		if test $customExt = 1
+		then
+			cob -z,sys,nounload ESDB2XA.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "Y"' -C 'CONSTANT CUSTOMEXT "Y"' -oESDB2XA$SUFF.so $XAOPTS -d ax_reg@casaxlib$SUFF.so -d ESXACUSTOMEXT@ESXACUSTOMEXT$SUFF.so $XAOPTS2
+		else
+		
+			cob -z,sys,nounload ESDB2XA.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "Y"' -C 'CONSTANT CUSTOMEXT "N"' -oESDB2XA$SUFF.so $XAOPTS -d ax_reg@casaxlib$SUFF.so -d ESXACUSTOMEXT@ESXACUSTOMEXT$SUFF.so $XAOPTS2
+		fi
 	fi
 	bldrtn=$?
 
@@ -233,11 +278,21 @@ DB2)
 	fi
 
 	cp -p ESDB2XA.CBL ESDB2XA_S.CBL
-	if test x.$param2 = x.-o
+	if test $odbcdb2 = 1
 	then
-		cob -z,sys,nounload ESDB2XA_S.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "N"' -oESDB2XA${SUFF}_S.so $XAOPTS $XAOPTS2 -d SQLFreeEnv@libodbc.so -C 'CONSTANT LOAD-ODBC "1"' -C 'USE"_mfxasw.dir"'
+		if test $customExt = 1
+		then
+			cob -z,sys,nounload ESDB2XA_S.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "N"' -C 'CONSTANT CUSTOMEXT "Y"' -oESDB2XA${SUFF}_S.so $XAOPTS $XAOPTS2 -d SQLFreeEnv@libodbc.so -d ESXACUSTOMEXT@ESXACUSTOMEXT$SUFF.so -C 'CONSTANT LOAD-ODBC "1"' -C 'USE"_mfxasw.dir"'
+		else
+			cob -z,sys,nounload ESDB2XA_S.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "N"' -C 'CONSTANT CUSTOMEXT "N"' -oESDB2XA${SUFF}_S.so $XAOPTS $XAOPTS2 -d SQLFreeEnv@libodbc.so -d ESXACUSTOMEXT@ESXACUSTOMEXT$SUFF.so -C 'CONSTANT LOAD-ODBC "1"' -C 'USE"_mfxasw.dir"'
+		fi
 	else
-		cob -z,sys,nounload ESDB2XA_S.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "N"' -oESDB2XA${SUFF}_S.so $XAOPTS $XAOPTS2 -C 'USE"_mfxasw.dir"'
+		if test $customExt = 1
+		then
+			cob -z,sys,nounload ESDB2XA_S.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "N"' -C 'CONSTANT CUSTOMEXT "Y"' -oESDB2XA${SUFF}_S.so $XAOPTS $XAOPTS2 -d ESXACUSTOMEXT@ESXACUSTOMEXT$SUFF.so -C 'USE"_mfxasw.dir"'
+		else
+			cob -z,sys,nounload ESDB2XA_S.CBL -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT DYNAMICREGISTRATION "N"' -C 'CONSTANT CUSTOMEXT "N"' -oESDB2XA${SUFF}_S.so $XAOPTS $XAOPTS2 -d ESXACUSTOMEXT@ESXACUSTOMEXT$SUFF.so -C 'USE"_mfxasw.dir"'
+		fi
 	fi
 	bldrtn=$?
 
@@ -289,9 +344,17 @@ ORA|OCI)
 			cob -z,sys,nounload ES${param}XA_D.CBL -C 'CONSTANT DYNAMICREGISTRATION "Y"' -C 'CONSTANT XAPLATFORM "UNIX"' -to ES${param}XA${SUFF}_D.so -e "" -L/bin/unix -L$ORACLE_HOME/$oracle_libdir/ $ORACLE_HOME/precomp/$oracle_libdir/cobsqlintf.o -lclntsh $COBFLAGS $OPC_OPTS  -d ax_reg@casaxlib$SUFF.so
 			rm -f ESOCIXA_D.CBL ESOCIXA_D.i?? ESOCIXA_D.o _mfxasw.dir > /dev/null 2>&1
                         ;;
-		ORA)	cob -z,sys,nounload -t ES${param}XA.CBL -C 'CONSTANT DYNAMICREGISTRATION "N"' -C 'CONSTANT XAPLATFORM "UNIX"' -oES${param}XA$SUFF.so -e "" -L/bin/unix -L$ORACLE_HOME/$oracle_libdir/ $ORACLE_HOME/precomp/$oracle_libdir/cobsqlintf.o -lclntsh $COBFLAGS $XAOPTS -C 'USE"_mfxasw.dir"'
+		ORA)	
+		if test $customOra = 1
+		then
+		    cob -z,sys,nounload -t ES${param}XA.CBL -C 'CONSTANT DYNAMICREGISTRATION "N"' -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT CUSTOMORA "Y"' -oES${param}XA$SUFF.so -e "" -L/bin/unix -L$ORACLE_HOME/$oracle_libdir/ $ORACLE_HOME/precomp/$oracle_libdir/cobsqlintf.o -lclntsh $COBFLAGS $XAOPTS -d ESXACUSTOMORA@ESXACUSTOMORA$SUFF.so -C 'USE"_mfxasw.dir"'
 			cp -p ESORAXA.CBL ESORAXA_D.CBL
-			cob -z,sys,nounload -tk ES${param}XA_D.CBL -C 'CONSTANT DYNAMICREGISTRATION "Y"' -C 'CONSTANT XAPLATFORM "UNIX"' -oES${param}XA${SUFF}_D.so -e "" -L/bin/unix -L$ORACLE_HOME/$oracle_libdir/ $ORACLE_HOME/precomp/$oracle_libdir/cobsqlintf.o -lclntsh $COBFLAGS $XAOPTS -d ax_reg@casaxlib$SUFF.so
+			cob -z,sys,nounload -tk ES${param}XA_D.CBL -C 'CONSTANT DYNAMICREGISTRATION "Y"' -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT CUSTOMORA "Y"' -oES${param}XA${SUFF}_D.so -e "" -L/bin/unix -L$ORACLE_HOME/$oracle_libdir/ $ORACLE_HOME/precomp/$oracle_libdir/cobsqlintf.o -lclntsh $COBFLAGS $XAOPTS -d ax_reg@casaxlib$SUFF.so -d ESXACUSTOMORA@ESXACUSTOMORA$SUFF.so
+		else
+		    cob -z,sys,nounload -t ES${param}XA.CBL -C 'CONSTANT DYNAMICREGISTRATION "N"' -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT CUSTOMORA "N"' -oES${param}XA$SUFF.so -e "" -L/bin/unix -L$ORACLE_HOME/$oracle_libdir/ $ORACLE_HOME/precomp/$oracle_libdir/cobsqlintf.o -lclntsh $COBFLAGS $XAOPTS -d ESXACUSTOMORA@ESXACUSTOMORA$SUFF.so -C 'USE"_mfxasw.dir"'
+			cp -p ESORAXA.CBL ESORAXA_D.CBL
+			cob -z,sys,nounload -tk ES${param}XA_D.CBL -C 'CONSTANT DYNAMICREGISTRATION "Y"' -C 'CONSTANT XAPLATFORM "UNIX"' -C 'CONSTANT CUSTOMORA "N"' -oES${param}XA${SUFF}_D.so -e "" -L/bin/unix -L$ORACLE_HOME/$oracle_libdir/ $ORACLE_HOME/precomp/$oracle_libdir/cobsqlintf.o -lclntsh $COBFLAGS $XAOPTS -d ax_reg@casaxlib$SUFF.so -d ESXACUSTOMORA@ESXACUSTOMORA$SUFF.so
+		fi
 			rm -f ESORAXA_D.CBL ESORAXA_D.i?? ESORAXA_D.o _mfxasw.dir > /dev/null 2>&1
                         ;;
 		esac

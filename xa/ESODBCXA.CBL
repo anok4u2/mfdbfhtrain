@@ -221,9 +221,10 @@
           03 DatabaseType                  PIC X(10).
           03 ConnectionString              PIC X(256) VALUE LOW-VALUES.
           03 DoImpersonate.
-             05 DoBATCH           PIC X COMP-X.
-             05 DoCICS            PIC X COMP-X.
-             05 DoIMS             PIC X COMP-X.
+             05 DoBATCH                    PIC X COMP-X.
+             05 DoCICS                     PIC X COMP-X.
+             05 DoIMS                      PIC X COMP-X.
+             05 DoORACLE                   PIC X COMP-X.
           03 LUsername                     PIC X COMP-X VALUE 0.
           03 TxEnabled                     PIC X COMP-X VALUE 0.
           03 EsLoggingLevel                PIC X(2) COMP-x.
@@ -265,6 +266,10 @@
        01 ix                               PIC S9(4) COMP-5.
 
        01 ImpersonatedUser                 PIC X(32).
+       01 ProxyUserString                  PIC X(128).
+       01 ProxyPassString                  PIC X(128).
+       01 NewUsrPassString                 PIC X(256).
+       01 NewLen                           PIC S9(4) COMP-5.
 
        01 ESXASuppPtr                      USAGE PROCEDURE-POINTER
                                                  VALUE NULL.
@@ -273,9 +278,15 @@
 
        01 XID.
       $IF P64 SET
+      $    IF XAPLATFORM = "WINDOWS"
+           03 lk-xid-formatid              PIC S9(9) COMP-5.
+           03 lk-xid-gtrid-length          PIC S9(9) COMP-5.
+           03 lk-xid-bqual-length          PIC S9(9) COMP-5.
+      $    ELSE
            03 lk-xid-formatid              PIC S9(18) COMP-5.
            03 lk-xid-gtrid-length          PIC S9(18) COMP-5.
            03 lk-xid-bqual-length          PIC S9(18) COMP-5.
+      $    END-IF
       $ELSE
            03 lk-xid-formatid              PIC S9(9) COMP-5.
            03 lk-xid-gtrid-length          PIC S9(9) COMP-5.
@@ -433,7 +444,7 @@
            .
       *--------------------------------------------------------------*
 	  
-	   xa-2pc-open SECTION.
+       xa-2pc-open SECTION.
        ENTRY esxa-2pc-open USING BY REFERENCE lk-open-string
                                  BY VALUE     lk-rmid
                                  BY VALUE     lk-flags.
@@ -611,22 +622,119 @@
 
               MOVE SPACES TO MFSQLMESSAGETEXT
 
-              IF ConnectionName(ConnIX) = SPACES
-                  *> Connection name defaults to XA resource name
-                  MOVE XAi-XA-Resource-Name TO ConnectionName(ConnIX)
-              END-IF
+              *> Connection name defaults to XA resource name
+              MOVE XAi-XA-Resource-Name TO ConnectionName(ConnIX)
 
               MOVE ConnectionName(ConnIX) TO ThisConnName
+
+           *> impersonation for Oracle when using MBDT
+           *> only do this for Oracle by verifying USERP=O and BATCHONLY=T
+           *> also make sure USRPASS has been set 
+              IF XAi-SEP-type = sepIsJCL and doORACLE(ConnIX) = 1
+                 and doBATCH(ConnIX) <> 1
+                 and doCICS(ConnIX)  <> 1
+                 and doIMS(ConnIX)   <> 1
+                 and TxEnabled(ConnIX) = 0 
+                 and UsrPassString <> LOW-VALUES
+
+                  PERFORM GetImpersonatedUser
+                  IF ImpersonatedUser NOT = SPACES
+                      UNSTRING UsrPassString delimited by "."
+                          INTO ProxyUserString, ProxyPassString 
+                      move 1 to NewLen
+                      move SPACES to NewUsrPassString
+                      STRING 
+                         ProxyUserString     DELIMITED SPACE
+                         "["                 DELIMITED SIZE
+                         ImpersonatedUser    DELIMITED SPACE
+                         "]."                DELIMITED SIZE
+                         ProxyPassString     DELIMITED SPACE
+                      INTO NewUsrPassString pointer NewLen
+
+      *               MOVE 1 TO MsgLen
+      *               MOVE 1 TO MsgLevel
+      *               STRING
+      *                   "Old UsrPass " DELIMITED SIZE
+      *                    UsrPassString      DELIMITED SIZE
+      *               INTO consoleMessage pointer MsgLen
+      *               SUBTRACT 1 FROM MsgLen
+      *               CALL "mfxaLogConsoleMsg" USING
+      *                          consoleMessage MsgLen
+      *                          EsLoggingLevel(ConnIX) MsgLevel
+      *               END-CALL
+      *
+      *               MOVE 1 TO MsgLen
+      *               MOVE 1 TO MsgLevel
+      *               STRING
+      *                   "New UsrPass " DELIMITED SIZE
+      *                    NewUsrPassString DELIMITED SIZE
+      *               INTO consoleMessage pointer MsgLen
+      *               SUBTRACT 1 FROM MsgLen
+      *               CALL "mfxaLogConsoleMsg" USING
+      *                          consoleMessage MsgLen
+      *                          EsLoggingLevel(ConnIX) MsgLevel
+      *               END-CALL
+                      
+                      EXEC SQL
+                         CONNECT TO :DsnString  AS :ThisConnName
+                         USER :NewUsrPassString
+                      END-EXEC
+                      
+                      IF 78-CTF-FLAG-LEVEL-INFO >= ctf-trace-level
+                          MOVE SPACES TO ls-trace-data-desc
+                          STRING "ESODBCXA Execute as " ImpersonatedUser
+                             DELIMITED BY SPACE
+                          INTO ls-trace-data-desc
+                          END-STRING
+                          MOVE EVENT-ODBC-EXECUTEAS   TO ls-trace-event
+                          MOVE 78-CTF-FLAG-LEVEL-INFO TO ls-trace-level
+                          PERFORM trace-odbc-event
+                      END-IF
+                      
+                      IF SQLCODE < 0
+                          INSPECT MFSQLMESSAGETEXT REPLACING 
+                              TRAILING SPACE BY X"FF"
+                          MOVE 1 TO MsgLen
+                          MOVE 1 TO MsgLevel
+                          STRING
+                              XAi-XA-Resource-Name DELIMITED SPACE
+                              ": " DELIMITED SIZE
+                              "User Impersonated as [" DELIMITED SIZE
+                              ImpersonatedUser DELIMITED SPACE
+                              "] failed." DELIMITED SIZE
+                              MFSQLMESSAGETEXT DELIMITED X"FF"
+                          INTO consoleMessage pointer MsgLen
+                          SUBTRACT 1 FROM MsgLen
+                          CALL "mfxaLogConsoleMsg" USING
+                                     consoleMessage MsgLen
+                                     EsLoggingLevel(ConnIX) MsgLevel
+                          END-CALL
+                          MOVE 0 TO Impersonating(ConnIX)
+                          MOVE SPACES TO MFSQLMESSAGETEXT
+                      ELSE
+                          MOVE 1 TO Impersonating(ConnIX)
+                      END-IF
+
+                      INITIALIZE NewUsrPassString
+                                 ProxyUserString
+                                 ProxyPassString
+                                 ImpersonatedUser
+                  END-IF
+              END-IF
 
               IF UsrPassString = LOW-VALUES
                     EXEC SQL
                        CONNECT TO :DsnString AS :ThisConnName
                     END-EXEC
               ELSE
+                  IF Impersonating(ConnIX) = 0
                     EXEC SQL
                        CONNECT TO :DsnString  AS :ThisConnName
                        USER :UsrPassString
                     END-EXEC
+                  ELSE
+                    MOVE 0 TO Impersonating(ConnIX)
+                  END-IF
               END-IF
    
               *> Discard credentials as soon as they are no longer needed
@@ -771,21 +879,22 @@
            *> Disconnect from the data source.
            MOVE lk-rmid TO ws-rmid
 
+           *> Find the current ConnInfo based on RMID
+           PERFORM VARYING ConnIX FROM 1 BY 1
+                UNTIL ConnIX > MAX-CONNECTIONS
+                IF ResMgrID(ConnIX) = lk-rmid AND
+                   TxEnabled(ConnIX) = 0
+                    *> BATCHONLY=T, skip all 2pc tasks and
+                    *> Mark connection table entry free
+                    MOVE 0 TO ResMgrID(ConnIX)
+                    GOBACK RETURNING XA-OK
+                END-IF
+           END-PERFORM
+
            PERFORM SetCurrentConnection
            MOVE "CLOSE" TO LastCall(ConnIX)
 
-      $if MFDBFH-SUPPORT defined
-           PERFORM mfdbfh-connection-deregister
-      $end MFDBFH-SUPPORT defined
-
-           *> BATCHONLY=T, skip all 2pc tasks.
-           IF TxEnabled(ConnIX) = 0
-               *> Mark connection table entry free
-               MOVE 0 TO ResMgrID(ConnIX)
-               GOBACK RETURNING XA-OK
-           END-IF
-		   
-		   call esxa-close using
+           call esxa-close using
                 by reference lk-close-string
                 by value     lk-rmid
                 by value     lk-flags
@@ -853,7 +962,7 @@
               MOVE 0  TO ws-close-rc
            END-IF
 
-           MOVE SPACES TO ResName(ConnIX)
+           MOVE SPACES TO ResName(ConnIX) ConnectionName(ConnIX)
            MOVE 0 TO ResMgrID(ConnIX)
 
            IF 78-CTF-FLAG-LEVEL-INFO >= ctf-trace-level
@@ -966,13 +1075,19 @@
            MOVE SPACES TO MFSQLMESSAGETEXT
 
            MOVE lk-rmid TO ws-rmid
+
+           *> Find the current ConnInfo based on RMID
+           PERFORM VARYING ConnIX FROM 1 BY 1
+             UNTIL ConnIX > MAX-CONNECTIONS
+               IF ResMgrID(ConnIX) = lk-rmid AND
+                 TxEnabled(ConnIX) = 0
+                   *> BATCHONLY=T, skip all 2pc tasks.
+                   GOBACK RETURNING XA-OK
+               END-IF
+           END-PERFORM
+
            PERFORM SetCurrentConnection
            MOVE "START" TO LastCall(ConnIX)
-
-           *> BATCHONLY=T, skip all 2pc tasks.
-           IF TxEnabled(ConnIX) = 0
-               GOBACK RETURNING XA-OK
-           END-IF
 
       $IF XA-RECONNECT DEFINED
            MOVE 0 TO ws-start-rc
@@ -1102,6 +1217,7 @@
                MOVE EVENT-ODBC-START            TO ls-trace-event
                MOVE 78-CTF-FLAG-LEVEL-INFO TO ls-trace-level
                PERFORM trace-odbc-event
+               *>PERFORM trc-xid
            END-IF
 
            GOBACK RETURNING ws-start-rc
@@ -1113,13 +1229,19 @@
                                 BY VALUE     lk-flags.
 
            MOVE lk-rmid TO ws-rmid
+
+           *> Find the current ConnInfo based on RMID
+           PERFORM VARYING ConnIX FROM 1 BY 1
+             UNTIL ConnIX > MAX-CONNECTIONS
+               IF ResMgrID(ConnIX) = lk-rmid AND
+                 TxEnabled(ConnIX) = 0
+                   *> BATCHONLY=T, skip all 2pc tasks.
+                   GOBACK RETURNING XA-OK
+               END-IF
+           END-PERFORM
+
            PERFORM SetCurrentConnection
            MOVE "END" TO lastCall(ConnIX)
-                      
-           *> BATCHONLY=T, skip all 2pc tasks.
-           IF TxEnabled(ConnIX) = 0
-               GOBACK RETURNING XA-OK
-           END-IF
 
            MOVE 0 TO ws-end-rc
 
@@ -1157,13 +1279,19 @@
            MOVE 0 TO ws-prepare-rc
 
            MOVE lk-rmid TO ws-rmid
+
+           *> Find the current ConnInfo based on RMID
+           PERFORM VARYING ConnIX FROM 1 BY 1
+             UNTIL ConnIX > MAX-CONNECTIONS
+               IF ResMgrID(ConnIX) = lk-rmid AND
+                 TxEnabled(ConnIX) = 0
+                   *> BATCHONLY=T, skip all 2pc tasks.
+                   GOBACK RETURNING XA-OK
+               END-IF
+           END-PERFORM
+
            PERFORM SetCurrentConnection
            MOVE "PREPARE" TO LastCall(ConnIX)
-           
-           *> BATCHONLY=T, skip all 2pc tasks.
-           IF TxEnabled(ConnIX) = 0
-               GOBACK RETURNING XA-OK
-           END-IF      
          
            PERFORM RestoreApplicationConnection            
            GOBACK RETURNING ws-prepare-rc
@@ -1179,15 +1307,21 @@
            *> Commit the transaction
 
            MOVE lk-rmid TO ws-rmid
+
+           *> Find the current ConnInfo based on RMID
+           PERFORM VARYING ConnIX FROM 1 BY 1
+             UNTIL ConnIX > MAX-CONNECTIONS
+               IF ResMgrID(ConnIX) = lk-rmid AND
+                 TxEnabled(ConnIX) = 0
+                   *> BATCHONLY=T, skip all 2pc tasks.
+                   GOBACK RETURNING XA-OK
+               END-IF
+           END-PERFORM
+
            PERFORM SetCurrentConnection
            MOVE "COMMIT" to LastCall(ConnIX)
-            
-           *> BATCHONLY=T, skip all 2pc tasks.
-           IF TxEnabled(ConnIX) = 0
-               GOBACK RETURNING XA-OK
-           END-IF
 		   
-		   call esxa-commit using
+           call esxa-commit using
                 by reference lk-xid
                 by value     lk-rmid
                 by value     lk-flags
@@ -1219,30 +1353,6 @@
                GOBACK RETURNING XA-OK
            END-IF
             
-           EXEC SQL
-                COMMIT TRANSACTION
-           END-EXEC
-
-           IF SQLCODE NOT = ZERO
-              MOVE -3 TO ws-commit-rc
-           ELSE
-              MOVE 0  TO ws-commit-rc
-           END-IF
-
-           IF 78-CTF-FLAG-LEVEL-INFO >= ctf-trace-level
-               MOVE SPACES TO ls-trace-data-desc
-               STRING "ESODBCXA Commit(" 
-                   ResName(ConnIX) DELIMITED BY "  "
-                   ")" DELIMITED BY SPACES
-                   INTO ls-trace-data-desc
-               END-STRING
-               MOVE EVENT-ODBC-COMMIT           TO ls-trace-event
-               MOVE 78-CTF-FLAG-LEVEL-INFO TO ls-trace-level
-               PERFORM trace-odbc-event
-           END-IF
-
-           PERFORM EndUserImpersonation
-
            IF (XAi-SEP-type = sepIsCICS OR
                XAi-SEP-type = sepIsWebServices)
                CALL "mfxaGetEotFlag" USING
@@ -1274,12 +1384,62 @@
                     MOVE 78-CTF-FLAG-LEVEL-INFO TO ls-trace-level
                     PERFORM trace-odbc-event
                 END-IF
+           EXEC SQL
+                COMMIT TRANSACTION
+           END-EXEC
+
+           IF SQLCODE NOT = ZERO
+              MOVE -3 TO ws-commit-rc
+           ELSE
+              MOVE 0  TO ws-commit-rc
+           END-IF
+
+           IF 78-CTF-FLAG-LEVEL-INFO >= ctf-trace-level
+               MOVE SPACES TO ls-trace-data-desc
+               STRING "ESODBCXA Commit(" 
+                   ResName(ConnIX) DELIMITED BY "  "
+                   ")" DELIMITED BY SPACES
+                   INTO ls-trace-data-desc
+               END-STRING
+               MOVE EVENT-ODBC-COMMIT           TO ls-trace-event
+               MOVE 78-CTF-FLAG-LEVEL-INFO TO ls-trace-level
+               PERFORM trace-odbc-event
+               *>PERFORM trc-xid
+           END-IF
+
+           PERFORM EndUserImpersonation
+
 
            ELSE
                *> CICS EOT, so more complete clean up
                *> Close all cursors and drop all HCOSS global temp tables
                *> Do this in autocommit mode, outside of a transaction
                *> after we have de-enlisted
+           EXEC SQL
+                COMMIT TRANSACTION
+           END-EXEC
+
+           IF SQLCODE NOT = ZERO
+              MOVE -3 TO ws-commit-rc
+           ELSE
+              MOVE 0  TO ws-commit-rc
+           END-IF
+
+           IF 78-CTF-FLAG-LEVEL-INFO >= ctf-trace-level
+               MOVE SPACES TO ls-trace-data-desc
+               STRING "ESODBCXA Commit(" 
+                   ResName(ConnIX) DELIMITED BY "  "
+                   ")" DELIMITED BY SPACES
+                   INTO ls-trace-data-desc
+               END-STRING
+               MOVE EVENT-ODBC-COMMIT           TO ls-trace-event
+               MOVE 78-CTF-FLAG-LEVEL-INFO TO ls-trace-level
+               PERFORM trace-odbc-event
+               *>PERFORM trc-xid
+           END-IF
+
+           PERFORM EndUserImpersonation
+
 
                 EXEC SQL
                     RESET CONNECTION
@@ -1298,9 +1458,9 @@
                 END-IF
            END-IF
            
-           EXEC SQL
-                COMMIT TRANSACTION
-           END-EXEC
+      *     EXEC SQL
+      *          COMMIT TRANSACTION
+      *     END-EXEC
 
       $IF DYNAMICREGISTRATION = "Y"
            SET hvppTrigger TO ENTRY esxa-register
@@ -1340,14 +1500,20 @@
            *> Rollback the transaction
 
            MOVE lk-rmid TO ws-rmid
+
+           *> Find the current ConnInfo based on RMID
+           PERFORM VARYING ConnIX FROM 1 BY 1
+             UNTIL ConnIX > MAX-CONNECTIONS
+               IF ResMgrID(ConnIX) = lk-rmid AND
+                 TxEnabled(ConnIX) = 0
+                   *> BATCHONLY=T, skip all 2pc tasks.
+                   GOBACK RETURNING XA-OK
+               END-IF
+           END-PERFORM
+
            PERFORM SetCurrentConnection
-           
-           *> BATCHONLY=T, skip all 2pc tasks.
-           IF TxEnabled(ConnIX) = 0
-               GOBACK RETURNING XA-OK
-           END-IF
 		   
-		   call esxa-rollback using
+           call esxa-rollback using
                 by reference lk-xid
                 by value     lk-rmid
                 by value     lk-flags
@@ -1428,6 +1594,7 @@
                MOVE EVENT-ODBC-ROLLBACK         TO ls-trace-event
                MOVE 78-CTF-FLAG-LEVEL-INFO TO ls-trace-level
                PERFORM trace-odbc-event
+               *>PERFORM trc-xid
            END-IF
 
            PERFORM EndUserImpersonation
@@ -1588,6 +1755,13 @@
                               RETURNING SqlRtn
                            END-CALL
                        END-IF
+              WHEN "MYSQL"
+                       IF SQLSTATE = 'S0002' AND SQLCODE = -1146
+                           SET ws-connect-ok-88 TO TRUE
+                       ELSE
+                           SET ws-connect-fail-88 TO TRUE
+                       END-IF
+                       GOBACK RETURNING ws-connect-status
               WHEN "OTHER"
                        *> Unknown database (including XDB)
                        *> Always return connection OK
@@ -1673,6 +1847,7 @@
                PERFORM Customization
            END-IF
 
+           MOVE 0 to parseErrorFlag
            MOVE 1 TO OuterPosn
 
            PERFORM UNTIL OuterPosn > 256
@@ -1717,6 +1892,7 @@
                        MOVE 1 TO DoBATCH(ConnIX)
                        MOVE 1 TO DoCICS(ConnIX)
                        MOVE 1 TO DoIMS(ConnIX)
+                       MOVE 1 TO DoORACLE(ConnIX)
                    ELSE 
                    IF ValueString(1:1) = 'B' OR ValueString(1:1) = 'b'
                        MOVE 1 TO DoBATCH(ConnIX)
@@ -1727,7 +1903,11 @@
                    IF ValueString(1:1) = 'I' OR ValueString(1:1) = 'i'
                        MOVE 1 TO DoIMS(ConnIX)
                    ELSE
+                   IF ValueString(1:1) = 'O' OR ValueString(1:1) = 'o'
+                       MOVE 1 TO DoORACLE(ConnIX)
+                   ELSE
                        INITIALIZE DoImpersonate(ConnIX)
+                   END-IF
                    END-IF
                    END-IF
                    END-IF
@@ -1764,6 +1944,9 @@
                    COMPUTE temp2X = (temp2X * 16) + tempX
 
                    MOVE temp2X TO EsLoggingLevel(Connix)
+                   IF parseErrorFlag not = 0
+                       EXIT SECTION
+                   END-IF
                WHEN "ISOLEVEL"
                    CALL "CBL_TOUPPER" USING ValueString
                                   BY VALUE FUNCTION LENGTH(ValueString)
@@ -1831,6 +2014,7 @@
            .
 
        hexConvert SECTION.
+           MOVE 0 TO parseErrorFlag
            *> hopefully this will work in both EBCDIC and ASCII
            IF temp >= '0' AND tempX <= '9'
                MOVE '0' TO temp0
@@ -1996,19 +2180,7 @@
            END-IF
            .
 
-       BeginUserImpersonation section.
-           *> Strip trailing spaces from userid
-
-           IF DoImpersonate(ConnIX) = LOW-VALUES
-                   OR DatabaseType(ConnIX) NOT = "SQLSERVER"
-               EXIT SECTION
-           END-IF
-
-           *> Refresh ES info to get current user
-           MOVE 2 TO XAi-version
-           CALL "mfxaGetRegionInfo" USING BY REFERENCE XA-inquiry
-               END-CALL
-
+       GetImpersonatedUser section.
            *> Check for each SEP TYPE
            IF ( DoBATCH(ConnIX) = 0 AND XAi-SEP-type = sepIsJCL ) OR
               ( DoCICS(ConnIX) = 0 AND XAi-SEP-type = sepIsCICS ) OR
@@ -2041,6 +2213,29 @@
                    ImpersonatedUserLen = 0 OR
                    ImpersonatedUser(ImpersonatedUserLen:1) NOT = " "
            END-PERFORM
+           .
+
+       BeginUserImpersonation section.
+           *> Strip trailing spaces from userid
+
+           IF DoImpersonate(ConnIX) = LOW-VALUES
+                   OR DatabaseType(ConnIX) NOT = "SQLSERVER"
+               EXIT SECTION
+           END-IF
+
+           *> Refresh ES info to get current user
+           MOVE 2 TO XAi-version
+           CALL "mfxaGetRegionInfo" USING BY REFERENCE XA-inquiry
+               END-CALL
+
+           *> Check for each SEP TYPE
+           IF ( DoBATCH(ConnIX) = 0 AND XAi-SEP-type = sepIsJCL ) OR
+              ( DoCICS(ConnIX) = 0 AND XAi-SEP-type = sepIsCICS ) OR
+              ( DoIMS(ConnIX) = 0 AND XAi-SEP-type = sepIsIMS )
+               EXIT SECTION
+           END-IF
+
+           PERFORM GetImpersonatedUser
 
       *    INITIALIZE sqltext
       *    STRING
@@ -2090,9 +2285,6 @@
 
            IF SQLCODE NOT = 0
                MOVE 0 TO ImpersonatedUserLen
-               MOVE 0 TO Impersonating(ConnIX)
-           ELSE
-               MOVE 1 TO Impersonating(ConnIX)
            END-IF
 
            IF 78-CTF-FLAG-LEVEL-INFO >= ctf-trace-level
@@ -2139,8 +2331,6 @@
                MOVE 78-CTF-FLAG-LEVEL-INFO TO ls-trace-level
                PERFORM trace-odbc-event
            END-IF
-
-           MOVE 0 TO Impersonating(ConnIX)
 
            EXIT SECTION.
 
@@ -2281,6 +2471,53 @@
 
            ADD 1 TO ls-trace-data-count
 
+           .
+
+       trc-xid SECTION.
+
+           MOVE SPACES TO TmpString
+           IF lk-xid-formatid of lk-xid = -1
+               MOVE "Empty XID value" to TmpString
+               MOVE 15 to ctf-trace-event-lens(1)
+           ELSE
+               IF lk-xid-bqual-length of lk-xid > 64 OR
+                  lk-xid-gtrid-length of lk-xid > 64
+                   MOVE "Invalid XID value" to TmpString
+                   MOVE 17 to ctf-trace-event-lens(1)
+               ELSE
+                   ADD lk-xid-bqual-length of lk-xid to
+                     lk-xid-gtrid-length of lk-xid giving
+                     ctf-trace-event-lens(1)
+
+                   MOVE lk-xid-value of lk-xid TO TmpString
+                   PERFORM VARYING ix FROM 1 BY 1
+                     UNTIL ix > ctf-trace-event-lens(1)
+                       IF TmpString(ix:1) = low-value
+                           MOVE SPACE TO TmpString(ix:1)
+                       END-IF
+                   END-PERFORM
+               END-IF
+           END-IF
+
+           SET ctf-trace-event-ptrs(1) TO 
+               ADDRESS OF TmpString
+
+           MOVE 78-TRACE-EVENT-TYPE-TEXT TO
+                ctf-trace-event-types(1)
+
+           MOVE 1 TO
+                cblte-trcevt-data-count OF ctf-trace-event
+
+           CALL "CBL_CTF_TRACE" USING BY VALUE     0
+                                      BY REFERENCE ctf-tracer-handle
+                                      BY REFERENCE ctf-trace-event
+           END-CALL
+
+           IF RETURN-CODE NOT = 0
+               DISPLAY "CBL_CTF_TRACE (rc = "
+                       return-code
+                       ")"
+           END-IF
            .
 
        probeDatabase section.

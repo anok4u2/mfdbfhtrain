@@ -452,6 +452,7 @@
                WHEN EVENT-ORA-CLOSE
                WHEN EVENT-ORA-PREPARE
                WHEN EVENT-ORA-RECOVER
+               WHEN EVENT-ORA-XAPING
                    PERFORM trc-ora-event-xacall
 
                WHEN EVENT-ORAOPC-OPEN-CONNECT
@@ -498,6 +499,25 @@
                WHEN EVENT-XDBOPC-PREROLLBACK
                WHEN EVENT-XDBOPC-PRECLOSE
                    PERFORM trc-xdbopc-event-info
+      $END
+
+      $IF XABUILD = "MQ" 
+               WHEN EVENT-ORIGINAL
+                   PERFORM trace-MQ-openstring-original
+               WHEN EVENT-MODIFIED
+                   PERFORM trace-MQ-openstring-modified
+               WHEN EVENT-MQLOAD
+                   PERFORM trace-MQ-event-MQload
+               WHEN EVENT-OPEN
+                   PERFORM trace-MQ-event-open
+               WHEN EVENT-OPEN-dfheibmq
+               WHEN EVENT-START
+               WHEN EVENT-END
+               WHEN EVENT-COMMIT
+               WHEN EVENT-ROLLBACK
+               WHEN EVENT-CLOSE
+               WHEN EVENT-PREPARE
+                   PERFORM trc-MQ-event-xacall
       $END
 
       $if MFDBFH-SUPPORT defined
@@ -550,7 +570,11 @@
                when event-mfdbfh-conn-reg
                 string
                     ">Register connection: "       delimited by size
+      $IF XABUILD = "ORA"
+                    XaDbNameData(ConnIx)(1:XaDbNameLength(ConnIx))
+      $ELSE
                     ConnectionName(ConnIX)         delimited space
+      $END XABUILD "ORA"
                     into ls-trace-data-desc
                 end-string
 
@@ -566,7 +590,11 @@
                when event-mfdbfh-conn-dereg
                 string
                     ">De-register connection: "    delimited by size
+      $IF XABUILD = "ORA"
+                    XaDbNameData(ConnIx)(1:XaDbNameLength(ConnIx))
+      $ELSE
                     ConnectionName(ConnIX)         delimited space
+      $END XABUILD "ORA"
                     into ls-trace-data-desc
                 end-string
 
@@ -588,7 +616,11 @@
                when event-mfdbfh-reset-xa-trig
                    string
                        ">Reset XA trigger: "       delimited by size
+      $IF XABUILD = "ORA"
+                       XaDbNameData(ConnIx)(1:XaDbNameLength(ConnIx))
+      $ELSE
                        ConnectionName(ConnIX)      delimited space
+      $END XABUILD "ORA"
                        into ls-trace-data-desc
                    end-string
 
@@ -622,11 +654,15 @@
                end-if
 
                call ws-mfdbfh-connection-dereg-pptr using
-      $if XABUILD = "DB2"
+      $IF XABUILD = "ORA"
+                                                          reference MfdbfhOciSvcCtx(ConnIX)
+      $ELSE
+      $IF XABUILD = "DB2"
                                                           reference hdbc(ConnIX)
-      $else
+      $ELSE
                                                           reference ConnectionHandle(ConnIX)
-      $end XABUILD
+      $END XABUILD "DB2"
+      $END XABUILD "ORA"
                                                           value     78-MFDBFH-CONN-REG-TYPE-ODBC
                                                           returning ws-mfdbfh-rc
                end-call
@@ -653,6 +689,9 @@
                    perform trace-(XXXXX)-event
                end-if
 
+      $IF XABUILD = "ORA"
+               set ls-mfdbfh-pptr to null
+      $ELSE
       $if XABUILD = "DB2"
                set ls-mfdbfh-pptr to null
       $else
@@ -661,7 +700,8 @@
       $else
                set ls-mfdbfh-pptr to null
       $end DYNAMICREGISTRATION = "Y"
-      $end XABUILD
+      $END XABUILD "DB2"
+      $END XABUILD "ORA"
 
       $if XABUILD = "DB2"
                if ws-mfdbfh-connection-reg-cred-pptr not = null
@@ -677,23 +717,93 @@
                    end-call
                else
       $end XABUILD
+
+      $IF XABUILD = "ORA"
+               IF XaDbNameLength(ConnIX) = 0 
+                   call "SQLSvcCtxGet" using value nullPtr
+                                         value nullPtr
+                                         value 0
+                                         reference MfdbfhOciSvcCtx(ConnIX)
+                                         returning retCode
+                   end-call
+               ELSE
+                   call "SQLSvcCtxGet" using value nullPtr
+                                         reference XaDbNameData(ConnIX)
+                                         value XaDbNameLength(ConnIX)
+                                         reference MfdbfhOciSvcCtx(ConnIX)
+                                         returning retCode
+                   end-call
+               END-IF
+
+               perform check-oci-error
+
+               if retCode not = OCI-ERROR
+                   if ws-mfdbfh-connection-reg-cred-pptr not = null
+                       move low-values to ServerString(ServerStringLen + 1 :)
+                       move low-values to UidString(UidStringLen + 1 :)
+                       move low-values to PwdString(PwdStringLen + 1 :)
+
+                       call ws-mfdbfh-connection-reg-cred-pptr using reference ResName(ConnIX)
+                                                                     reference MfdbfhOciSvcCtx(ConnIX)
+                                                                     value     78-MFDBFH-CONN-REG-TYPE-OCI
+                                                                     value     ws-mfdbfh-connection-reg-flags
+                                                                     reference ServerString
+                                                                     reference UidString
+                                                                     reference PwdString
+                                                                     value     ls-mfdbfh-pptr
+                                                                     returning ws-mfdbfh-rc
+                       end-call
+                   else
+                       call ws-mfdbfh-connection-reg-pptr using reference ResName(ConnIX)
+                                                                reference MfdbfhOciSvcCtx(ConnIX)
+                                                                value     78-MFDBFH-CONN-REG-TYPE-OCI
+                                                                value     ws-mfdbfh-connection-reg-flags
+                                                                value     ls-mfdbfh-pptr
+                                                                returning ws-mfdbfh-rc
+                       end-call
+                   end-if
+               else
+                   move -1 to ws-mfdbfh-rc
+               end-if
+      $ELSE
                call ws-mfdbfh-connection-reg-pptr using reference ResName(ConnIX)
-      $if XABUILD = "DB2"
+      $IF XABUILD = "DB2"
                                                         reference hdbc(ConnIX)
-      $else
+      $ELSE
                                                         reference ConnectionHandle(ConnIX)
-      $end XABUILD
+      $END XABUILD "DB2"
                                                         value     78-MFDBFH-CONN-REG-TYPE-ODBC
                                                         value     ws-mfdbfh-connection-reg-flags
                                                         value     ls-mfdbfh-pptr
                                                         returning ws-mfdbfh-rc
                end-call
-      $if XABUILD = "DB2"
+      $END XABUILD "ORA"
+
+      $IF XABUILD = "DB2"
                end-if
-      $end XABUILD
+      $END XABUILD "DB2"
 
                if ws-mfdbfh-rc = 78-mfdbfh-conn-reg-rc-success
                    move 1 to MfdbfhRegistered(ConnIX)
+
+      $if XABUILD = "DB2"
+                   if ws-mfdbfh-invocation-observer-pptr not = null
+                       set ls-mfdbfh-observer-pptr to entry 'mfdbfh_observer_db2'
+
+                       call ws-mfdbfh-invocation-observer-pptr using value 0 size 4
+                                                                     value ls-mfdbfh-observer-pptr
+                                                                     value 0 size 4
+                       end-call
+
+                       move low-values to ls-cancel-proc-params
+                       set cblte-cppb-callback of ls-cancel-proc-params to entry 'mfdbfh_observer_cancel_proc_db2'
+
+                       call 'CBL_CANCEL_PROC' using value     0 size 4
+                                                    reference ls-cancel-proc-params
+                                                    value     0 size 4
+                       end-call
+                   end-if
+      $end XABUILD
                end-if
 
                if 78-ctf-flag-level-info >= ctf-trace-level
@@ -733,6 +843,9 @@
                    set ws-mfdbfh-connection-dereg-pptr to entry 'MFDBFH_XA_CONNECTION_DEREGISTER'
                    set ws-mfdbfh-connection-reg-pptr to entry 'MFDBFH_XA_CONNECTION_REGISTER'
                    set ws-mfdbfh-connection-reg-cred-pptr to entry 'MFDBFH_XA_CONNECTION_REGISTER_CREDENTIALS'
+      $if XABUILD = "DB2"
+                   set ws-mfdbfh-invocation-observer-pptr to entry 'MFDBFH_INVOCATION_OBSERVER'
+      $end XABUILD
                else
                    if 78-ctf-flag-level-warn >= ctf-trace-level
                        move event-mfdbfh-not-loaded to ls-trace-event
@@ -751,6 +864,30 @@
            exit section
            .
 
+      $if XABUILD = "DB2"
+       mfdbfh-observer section.
+       entry 'mfdbfh_observer_db2'
+           *>  N.B. Please keep the processing in this callback to a minimum (e.g. just set a boolean that can then be tested elsewhere in processing)
+           *>  to minimise any performance impact on the application, as this will be invoked for every COBOL database file handler operation, and every
+           *>  MFDBFH API that performs database operations
+           goback
+           .
+
+       mfdbfh-observer-cancel-proc-db2 section.
+       entry 'mfdbfh_observer_cancel_proc_db2'
+           if ws-mfdbfh-invocation-observer-pptr not = null
+               set ls-mfdbfh-observer-pptr to entry 'mfdbfh_observer_db2'
+
+               call ws-mfdbfh-invocation-observer-pptr using value 1 size 4
+                                                             value ls-mfdbfh-observer-pptr
+                                                             value 0 size 4
+               end-call
+           end-if
+
+           goback
+           .
+      $end XABUILD
+
        mfdbfh-reset-xa-trigger section.
       $if DYNAMICREGISTRATION = "Y"
            if MfdbfhRegistered(ConnIX) not = 0
@@ -761,19 +898,28 @@
                    perform trace-(XXXXX)-event
                end-if
 
-      $if XABUILD = "DB2"
+      $IF XABUILD = "ORA"
                set ls-mfdbfh-pptr to null
-      $else
+      $ELSE
+      $IF XABUILD = "DB2"
+               set ls-mfdbfh-pptr to null
+      $ELSE
                set ls-mfdbfh-pptr to hvppTrigger
-      $end XABUILD
+      $END XABUILD "DB2"
+      $END XABUILD "ORA"
 
                call ws-mfdbfh-connection-reg-pptr using reference ResName(ConnIX)
-      $if XABUILD = "DB2"
+      $IF XABUILD = "ORA"
+                                                        reference MfdbfhOciSvcCtx(ConnIX)
+                                                        value     78-MFDBFH-CONN-REG-TYPE-OCI
+      $ELSE
+      $IF XABUILD = "DB2"
                                                         reference hdbc(ConnIX)
-      $else
+      $ELSE
                                                         reference ConnectionHandle(ConnIX)
-      $end XABUILD
+      $END XABUILD "DB2"
                                                         value     78-MFDBFH-CONN-REG-TYPE-ODBC
+      $END XABUILD "ORA"
                                                         value     ws-mfdbfh-connection-reg-flags
                                                         value     ls-mfdbfh-pptr
                                                         returning ws-mfdbfh-rc
