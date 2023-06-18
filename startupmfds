@@ -1,0 +1,5 @@
+#! /bin/sh
+#  We will startup mfds escwa and mf licensing
+
+
+nohup mfds &> /tmp/mfds.log &

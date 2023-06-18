@@ -1,8 +1,5 @@
 #! /bin/sh
 /var/microfocuslicensing/bin/startboth.sh 
+sleep 5
 . /opt/microfocus/EnterpriseDeveloper/bin/cobsetenv
-mfds &
-escwa &
-
-
-
+nohup mfds &> /tmp/mfds.log &

@@ -1,0 +1,88 @@
+{
+  "Version" : "0.0.1",
+  "MfdsList" : 
+  [
+    {
+      "Uid" : "4ac7ed63-5ccd-4630-bbfc-c8df212abc6e",
+      "MfdsHost" : "127.0.0.1",
+      "MfdsPort" : "86",
+      "MfdsIdentifier" : "Default",
+      "MfdsDescription" : ""
+    }
+  ],
+  "LogicalGroupList" : 
+  [
+  ],
+  "SorList" : 
+  [
+  ],
+  "PacList" : 
+  [
+  ],
+  "MfaList" : 
+  [
+  ],
+  "TraceConfig" : 
+  {
+    "TraceEnabled" : false,
+    "TraceLevel" : 4,
+    "TraceFileName" : "ESCommonWebAdmin.trace.txt",
+    "TraceBinary" : false,
+    "TraceConfig" : true,
+    "TraceJson" : true,
+    "TraceComms" : true,
+    "TraceSession" : true,
+    "TraceSAF" : true,
+    "TraceVault" : true,
+    "TraceAudit" : true
+  },
+  "AuditConfig" : 
+  {
+    "AuditEnabled" : false
+  },
+  "SecurityConfig" : 
+  {
+    "ActiveEsms" : 
+    [
+    ],
+    "CacheLimit" : 0,
+    "CacheTTL" : 0,
+    "Config" : "",
+    "VerifyAll" : false,
+    "UnknownResources" : false,
+    "UnknownUsers" : false,
+    "AuditEvents" : false,
+    "UseAllGroups" : true
+  },
+  "BasicConfig" : 
+  {
+    "CommsTimeout" : 30,
+    "DefaultUILocale" : "BROWSER",
+    "NonConfiguredMfdsConnect" : true,
+    "MfRequestedEndpoint" : "tcp:*:10086",
+    "MfSSLCertificateLocation" : "",
+    "MfSSLKeyfile" : "",
+    "MfSSLClientOption" : "All",
+    "MfSSLCARootfile" : "",
+    "MfSSLHonorServerCipherList" : true,
+    "MfTLSProtocols" : "",
+    "MfTLSCipherSuites" : "",
+    "MfTLS13CipherSuites" : "",
+    "MfTLSDHMinimumGroupSize" : 0,
+    "MfTLSCipherGroups" : "",
+    "MfTLSMiddleBoxCompatibilityMode" : true,
+    "HSTSEnabled" : false,
+    "HSTSMaxAge" : 31536000,
+    "SeeHost" : "http:\/\/127.0.0.1:8686",
+    "SessionTimeout" : 300,
+    "SessionLimit" : 50,
+    "InsecureAutoSignOn" : false,
+    "LogDirectory" : "",
+    "LogFileSize" : 1024,
+    "LogFileCount" : 5,
+    "VaultSpecification" : ""
+  },
+  "EsmList" : 
+  [
+  ]
+}
