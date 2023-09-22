@@ -1,0 +1,9 @@
+#! /bin/sh
+dbfhadmin -verify -list -usedb:MYSERVER -name:MYPAC
+dbfhadmin -verify -list -datastore:sql://MYSERVER/VSAMDATA
+dbfhadmin -verify -recover -usedb:MYSERVER -name:MYPAC
+dbfhadmin -verify -recover -datastore:sql://MYSERVER/VSAMDATA
+
+
+
+

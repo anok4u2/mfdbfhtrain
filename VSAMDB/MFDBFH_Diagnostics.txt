@@ -1,0 +1,214 @@
+## **************************************************************************
+## *    Copyright (C) 1984-2022 Micro Focus. All rights reserved.
+## *
+## *    The software and information contained herein are proprietary
+## *    to, and comprise valuable trade secrets of, Micro Focus,
+## *    which intends to preserve as trade secrets such software and
+## *    information. This software is an unpublished copyright of
+## *    Micro Focus and may not be used, copied, transmitted, or
+## *    stored in any manner other than as expressly provided in a
+## *    written instrument signed by Micro Focus and the user. This
+## *    software and information or any other copies thereof may not
+## *    be provided or otherwise made available to any other person.
+## *
+## **************************************************************************
+
+################################################################################
+## MFDBFH diagnostics
+################################################################################
+
+##                     Date: 2023-09-21 13:52:05.177
+##           Build revision: 1294347
+##                Build tag: mfdbfh_ED_9.032
+##             Host machine: ip-172-31-34-194.eu-west-2.compute.internal
+##                     User: ec2-user
+##              Server name: myserver
+##              Region name: MYPAC
+##           Region DB name: MYPAC
+##        Region DB edition: PostgreSQL 10.23 on x86_64-redhat-linux-gnu, compiled by gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-15), 64-bit
+##     Cross-region DB name: $XREGN$
+##  Cross-region DB edition: PostgreSQL 10.23 on x86_64-redhat-linux-gnu, compiled by gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-15), 64-bit
+##       Configuration file: MFDBFH.cfg
+
+################################################################################
+## Configuration file - MFDBFH.cfg
+################################################################################
+[CONFIG-START]
+<?xml version="1.0" encoding="utf-8"?>
+<!-- MFDBFH server and database configuration -->
+<datastores usevault="false">
+  <!--POSTGRES server-->
+  <server name="MYSERVER" type="postgresql" access="odbc">
+    <dsn name="PG.POSTGRES" type="database" dbname="postgres" userid="postgres" password="********"/>
+    <dsn name="PG.VSAMDATA" type="datastore" dsname="VSAMDATA" dbname="VSAMDATA" optio="none" userid="postgres" password="********"/>
+    <dsn name="PG.MYPAC" type="region.cas" region="MYPAC" dbname="MYPAC" feature="all" userid="postgres" password="********"/>
+    <dsn name="PG.CROSSREGION" type="crossregion.cas" dbname="$XREGN$" heartbeat="5" userid="postgres" password="********"/>
+  </server>
+</datastores>
+[CONFIG-END]
+
+################################################################################
+## Cross-region database - $XREGN$ (PG.CROSSREGION)
+################################################################################
+[DB-START] dsn=PG.CROSSREGION
+
+[TABLE-START] name=$$ACTIVE$$Processes
+[COLS] Id   Time                       Host                                           Name        PID     TID          Region   RegionId                            Heartbeat                  HeartbeatInterval
+[ROW]  320, "2023/09/20 15:00:29.372", "ip-172-31-34-194.eu-west-2.compute.internal", "casmgr64", 126556, -2118908160, "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:47.736", 5
+[ROW]  321, "2023/09/20 15:00:29.826", "ip-172-31-34-194.eu-west-2.compute.internal", "castsc64", 126576, 486573824,   "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:47.322", 5
+[ROW]  322, "2023/09/20 15:00:30.922", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126621, 1893771008,  "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:44.460", 5
+[ROW]  323, "2023/09/20 15:00:31.182", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126659, -441583872,  "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:44.143", 5
+[ROW]  324, "2023/09/20 15:00:31.289", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126667, 1369609984,  "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:43.597", 5
+[ROW]  325, "2023/09/20 15:00:31.343", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126672, -1240025344, "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:47.434", 5
+[ROW]  326, "2023/09/20 15:00:31.371", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126685, -2107472128, "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:43.840", 5
+[ROW]  327, "2023/09/20 15:00:31.404", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126694, 578037504,   "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:47.735", 5
+[ROW]  328, "2023/09/20 15:00:31.916", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126619, -4815104,    "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:45.238", 5
+[ROW]  329, "2023/09/20 15:00:31.929", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126620, -785565952,  "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:45.596", 5
+[ROW]  330, "2023/09/20 15:00:32.018", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126631, 326518528,   "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:43.598", 5
+[ROW]  331, "2023/09/20 15:00:32.070", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126637, 1463179008,  "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:43.731", 5
+[ROW]  332, "2023/09/20 15:00:32.149", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126651, -1461164288, "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:44.167", 5
+[ROW]  333, "2023/09/20 15:00:32.148", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126644, -1232668928, "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:43.339", 5
+[ROW]  334, "2023/09/20 15:00:32.448", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126808, 341866240,   "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:44.143", 5
+[ROW]  335, "2023/09/20 15:00:32.509", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126812, 1196656384,  "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:45.344", 5
+[ROW]  336, "2023/09/20 15:00:32.568", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126818, -217184512,  "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:45.345", 5
+[ROW]  337, "2023/09/20 15:00:32.636", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126830, -1154439424, "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:44.030", 5
+[ROW]  338, "2023/09/20 15:00:32.682", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126842, 439105280,   "MYPAC", "47227E6F742E634E6D54704525755822", "2023/09/21 13:48:43.841", 5
+[ROW]  343, "2023/09/20 15:00:35.904", "ip-172-31-34-194.eu-west-2.compute.internal", "casmgr64", 126893, -151791872,  "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:04.046", 5
+[ROW]  344, "2023/09/20 15:00:36.207", "ip-172-31-34-194.eu-west-2.compute.internal", "castsc64", 126910, 1480185600,  "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:02.546", 5
+[ROW]  345, "2023/09/20 15:00:37.317", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126954, 14325504,    "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:02.847", 5
+[ROW]  346, "2023/09/20 15:00:37.563", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126990, 1366181632,  "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:04.142", 5
+[ROW]  347, "2023/09/20 15:00:37.619", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126998, -941357312,  "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:04.706", 5
+[ROW]  348, "2023/09/20 15:00:37.675", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  127003, -1498704128, "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:04.709", 5
+[ROW]  349, "2023/09/20 15:00:37.758", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  127016, 609355520,   "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:04.708", 5
+[ROW]  350, "2023/09/20 15:00:37.817", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  127031, -1408014592, "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:03.146", 5
+[ROW]  351, "2023/09/20 15:00:38.317", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126952, -984602880,  "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:04.707", 5
+[ROW]  352, "2023/09/20 15:00:38.326", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126953, 2141275904,  "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:03.956", 5
+[ROW]  353, "2023/09/20 15:00:38.399", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126964, 4925184,     "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:01.946", 5
+[ROW]  354, "2023/09/20 15:00:38.463", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126970, -262179072,  "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:01.894", 5
+[ROW]  355, "2023/09/20 15:00:38.476", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126977, 1866057472,  "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:00.348", 5
+[ROW]  356, "2023/09/20 15:00:38.500", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  126985, 757352192,   "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:02.115", 5
+[ROW]  357, "2023/09/20 15:00:38.874", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  127131, 652343040,   "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:05.143", 5
+[ROW]  358, "2023/09/20 15:00:38.926", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  127135, 1401648896,  "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:02.351", 5
+[ROW]  359, "2023/09/20 15:00:38.971", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  127140, -700659968,  "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:00.454", 5
+[ROW]  360, "2023/09/20 15:00:39.042", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  127150, -1050724608, "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:02.960", 5
+[ROW]  361, "2023/09/20 15:00:39.076", "ip-172-31-34-194.eu-west-2.compute.internal", "cassi64",  127164, -2064881920, "MYPAC", "4C31225334554E24544F79245B42322F", "2023/09/21 13:52:02.236", 5
+[TABLE-END]
+
+[TABLE-START] name=$$ACTIVE$$Resource_Locks
+[COLS] Id  Time                       Owned  QNameKey          RNameKey                                Scope  TaskNumber  Region                              QName       RName                  ShareMode  LockId
+[ROW]  1,  "2023/09/21 13:45:03.415", true,  5359535A44534E20, 4D46444156532E46494C453030322E42415345, 2,     38,         "47227E6F742E634E6D54704525755822", "SYSZDSN ", "MFDAVS.FILE002.BASE", 0,         ""
+[TABLE-END]
+
+[TABLE-START] name=$$ACTIVE$$Resource_Locks_Process
+[COLS] ResourceLockId  ProcessRecordId
+[ROW]  1,              328
+[TABLE-END]
+
+[TABLE-START] name=$$ACTIVE$$Resource_Locks_Usage
+[COLS] Id  ProcessRecordId  Type  QNameKey  RNameKey  Region
+[TABLE-END]
+
+[DB-END]
+
+################################################################################
+## Region database - MYPAC (PG.MYPAC)
+################################################################################
+[DB-START] dsn=PG.MYPAC
+
+[TABLE-START] name=$$ACTIVE$$CSA
+[COLS] Id  RegionState  SchemaVersion  StartTime                  StopTime  StartingPgm  StartingHost                                   StartingPID  StoppingPgm  StoppingHost  StoppingPID  UsageCount
+[ROW]  1,  1,           3,             "2023/06/19 09:50:36.085", "",       "casmgr64",  "ip-172-31-34-194.eu-west-2.compute.internal", 8591,        "",          "",           -1,          4
+[TABLE-END]
+
+[TABLE-START] name=$$ACTIVE$$DataStore_Usage
+[COLS] Server      DataStore   Host                                           PID
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 8591
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 8649
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 8650
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 8651
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 8661
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 8666
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 8674
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 8681
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 8685
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 8689
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 8693
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 8697
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 8702
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 8908
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 9604
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 9662
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 9663
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 9664
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 9674
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 9679
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 9687
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 9694
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 9700
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 9706
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 9711
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 9720
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 9736
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 40864
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 123175
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 123349
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 123439
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 124042
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 124651
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 124712
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 124713
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 124714
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 124724
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 124728
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 124734
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 124741
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 124747
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 124752
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 124757
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 124769
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 124773
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 125553
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 125867
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126556
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126619
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126620
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126621
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126631
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126637
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126644
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126651
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126659
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126667
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126672
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126685
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126694
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126842
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126893
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126952
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126953
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126954
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126964
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126970
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126977
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126985
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126990
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 126998
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 127003
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 127016
+[ROW]  "myserver", "vsamdata", "IP-172-31-34-194.EU-WEST-2.COMPUTE.INTERNAL", 127031
+[TABLE-END]
+
+[TABLE-START] name=$$ACTIVE$$Resource_Locks
+[COLS] Id  Time                       Owned  QNameKey          RNameKey          Scope  TaskNumber  Region                              QName       RName       ShareMode  LockId
+[ROW]  63, "2023/09/21 13:45:03.378", true,  5359535A4A4F424E, 4A434C44454D4F31, 1,     38,         "47227E6F742E634E6D54704525755822", "SYSZJOBN", "JCLDEMO1", 0,         ""
+[ROW]  65, "2023/09/21 13:45:21.209", true,  5359535A4A4F424E, 4A434C44454D4F32, 1,     37,         "4C31225334554E24544F79245B42322F", "SYSZJOBN", "JCLDEMO2", 0,         ""
+[TABLE-END]
+
+[TABLE-START] name=$$ACTIVE$$Resource_Locks_Process
+[COLS] ResourceLockId  ProcessRecordId
+[ROW]  63,             328
+[ROW]  65,             351
+[TABLE-END]
+
+[DB-END]
+

@@ -1,0 +1,7 @@
+#! /bin/sh
+dbfhadmin -casprocess -list -usedb:MYSERVER
+dbfhadmin -openfiles -list -datastore:sql://MYSERVER/VSAMDATA
+dbfhadmin -openfiles -recover -datastore:sql://MYSERVER/VSAMDATA -host:ip-172-31-34-194.eu-west-2.compute.internal
+
+
+

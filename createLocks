@@ -1,0 +1,8 @@
+#! /bin/sh
+cassub -rCICSDB1 -jjcldemo1.jcl
+cassub -rCICSDB2 -jjcldemo2.jcl
+
+
+
+
+

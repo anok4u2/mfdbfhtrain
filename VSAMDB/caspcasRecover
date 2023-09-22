@@ -1,0 +1,7 @@
+#! /bin/sh
+caspac -aStatus=MYPAC -sredis,127.0.0.1:6379 -nMYSOR
+caspac -pMYPAC -aRecoverUUID=446A597B72534F335F52467857592541  -sredis,127.0.0.1:6379 -nMYSOR
+caspac -aStatus=MYPAC -sredis,127.0.0.1:6379 -nMYSOR
+
+
+

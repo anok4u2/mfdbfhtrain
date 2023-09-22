@@ -1,6 +1,11 @@
 #! /bin/sh
 dbfhadmin -casprocess -list -usedb:MYSERVER
 dbfhadmin -openfiles -list -datastore:sql://MYSERVER/VSAMDATA
+dbfhadmin -region -status -usedb:MYSERVER -name:MYPAC
+caspac -aStatus=MYPAC -sredis,127.0.0.1:6379 -nMYSOR
+dbfhadmin -region -list -usedb:MYSERVER -name:MYPAC
+
+
 
 
 

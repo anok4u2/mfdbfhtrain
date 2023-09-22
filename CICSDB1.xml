@@ -136,8 +136,8 @@ ES_ADMIN_SEPS=5
           <mfServerUID>1.2.840.5043.01.026.1614414228.3</mfServerUID>
           <mfInstance>1</mfInstance>
           <mfServerStatus>Stopped</mfServerStatus>
-          <mfRequestedEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:6062</mfRequestedEndpoint>
-          <mfActualEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:6062</mfActualEndpoint>
+          <mfRequestedEndpoint>tcp:ec2-52-56-126-65.eu-west-2.compute.amazonaws.com:6062</mfRequestedEndpoint>
+          <mfActualEndpoint>tcp:ec2-52-56-126-65.eu-west-2.compute.amazonaws.com:6062</mfActualEndpoint>
           <mfSSLCertificate/>
           <mfSSLKeyfile/>
           <mfSSLClientOption>1</mfSSLClientOption>
@@ -168,8 +168,8 @@ region=CICSDB1
               <mfServerUID>1.2.840.5043.06.005.1614414228.3</mfServerUID>
               <cn>Web Services and J2EE</cn>
               <mfListenerStatus>Stopped</mfListenerStatus>
-              <mfRequestedEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:6063</mfRequestedEndpoint>
-              <mfActualEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:0</mfActualEndpoint>
+              <mfRequestedEndpoint>tcp:ec2-52-56-126-65.eu-west-2.compute.amazonaws.com:6063</mfRequestedEndpoint>
+              <mfActualEndpoint>tcp:ec2-52-56-126-65.eu-west-2.compute.amazonaws.com:0</mfActualEndpoint>
               <mfConnector>mfcs-mp::mfcs-mp</mfConnector>
               <mfError>OK</mfError>
               <description>SOAP/REST Web Services and J2EE</description>
@@ -199,8 +199,8 @@ region=CICSDB1
               <mfServerUID>1.2.840.5043.06.005.1614414228.3</mfServerUID>
               <cn>Web</cn>
               <mfListenerStatus>Disabled</mfListenerStatus>
-              <mfRequestedEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:*</mfRequestedEndpoint>
-              <mfActualEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:0</mfActualEndpoint>
+              <mfRequestedEndpoint>tcp:ec2-52-56-126-65.eu-west-2.compute.amazonaws.com:*</mfRequestedEndpoint>
+              <mfActualEndpoint>tcp:ec2-52-56-126-65.eu-west-2.compute.amazonaws.com:0</mfActualEndpoint>
               <mfConnector>http-switch::http-switch</mfConnector>
               <mfError>Starting endpoint...</mfError>
               <description>Basic HTTP web server</description>
@@ -238,8 +238,8 @@ uploads=*.txt *.car *.wsdl
               <mfServerUID>1.2.840.5043.06.005.1614414228.3</mfServerUID>
               <cn>TN3270</cn>
               <mfListenerStatus>Stopped</mfListenerStatus>
-              <mfRequestedEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:6061</mfRequestedEndpoint>
-              <mfActualEndpoint>tcp:ec2-18-132-243-80.eu-west-2.compute.amazonaws.com:0</mfActualEndpoint>
+              <mfRequestedEndpoint>tcp:ec2-52-56-126-65.eu-west-2.compute.amazonaws.com:6061</mfRequestedEndpoint>
+              <mfActualEndpoint>tcp:ec2-52-56-126-65.eu-west-2.compute.amazonaws.com:0</mfActualEndpoint>
               <mfConnector>tn3270::tn3270</mfConnector>
               <mfError>OK</mfError>
               <description>Default TN3270 listener</description>

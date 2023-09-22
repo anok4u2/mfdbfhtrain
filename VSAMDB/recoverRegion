@@ -1,0 +1,8 @@
+#! /bin/sh
+dbfhadmin -region -list -usedb:MYSERVER -name:MYPAC
+dbfhadmin -region -recover -usedb:MYSERVER -name:MYPAC
+dbfhadmin -casprocess -recover -usedb:MYSERVER -host:ip-172-31-34-194.eu-west-2.compute.internal
+dbfhadmin -region -list -usedb:MYSERVER -name:MYPAC
+
+
+
