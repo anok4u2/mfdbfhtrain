@@ -1,0 +1,23 @@
+
+Removed from CasJCL:
+--------------------
+Key: JOB#0001019 Value: 31227B362E79243A5E572B442C3D7D2F
+
+Removed from CasAccept:
+-----------------------
+Key: 31227B362E79243A5E572B442C3D7D2F#   380579 Value:    380579 J0001019 JCLDEMO1 STEP2
+
+Removed from CasPING:
+---------------------
+Key: CICSDB1(ip-172-31-34-194.eu-west-2.compute.internal)@ip-172-31-34-194.eu-west-2.compute.internal Value: 09/28/2023@UTC:07:26:47.740(00000013340446007740)#31227B362E79243A5E572B442C3D7D2F
+
+Removed from CasRegs:
+---------------------
+Key: ip-172-31-34-194.eu-west-2.compute.internal:86@CICSDB1 Value: 31227B362E79243A5E572B442C3D7D2F
+
+Decremented PACNbRegions from CasPAC store.
+
+MFDBFH NB Regions decremented
+MFDBFH NB Regions actives =     3
+
+MFDBFH recover region done for UUID 31227B362E79243A5E572B442C3D7D2F
